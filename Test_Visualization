@@ -106,4 +106,4 @@ cursor.close()
 conn.close()
 
 
-# TODO: Create Data Visualizations using Matplotlib or Seaborn to get an insight on how we can visualize the data.
+# TO-DO : Create Data Visualizations using Matplotlib,Seaborn, and Plotly to get an insight on how we can visualize the data.
