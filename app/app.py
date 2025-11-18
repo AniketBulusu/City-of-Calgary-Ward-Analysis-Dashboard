@@ -34,19 +34,6 @@ def load_csv(name: str)-> pd.DataFrame:
     )
     return df
 
-age_sex_df = load_csv("_Ward_Age_Sex.csv")
-community_services_df = load_csv("_Ward_Community_Services.csv")
-crime_df = load_csv("_Ward_Crime.csv")
-disorder_df = load_csv("_Ward_Disorder.csv")
-education_df = load_csv("_Ward_Education.csv")
-election_result_df = load_csv("_Ward_Election_Results.csv")
-income_df = load_csv("_Ward_Household_Income.csv")
-labour_df = load_csv("_Ward_Labour_Force.csv")
-population_df = load_csv("_Ward_Population.csv")
-recreation_df = load_csv("_Ward_Rec_Facilities.csv")
-transit_stops_df = load_csv("_Ward_Transit_Stops.csv")
-work_transport_df = load_csv("_Ward_Work_Transport.csv")
-
 app = Dash()
 
 app.layout = [
