@@ -35,11 +35,11 @@ def get_engine():
                 print("Waiting for DB... (attempt {attempt + 1}/{retry})")
                 time.sleep(delay)
             else:
-                print("Database connection failed after {retry} attempts: {e}")
+                print(f"Database connection failed after {retry} attempts: {e}")
                 raise
 
 # data standardiser
-def load_data(filename):
+def load_csv(filename):
     df = pd.read_csv(DATA_DIR / filename)
     df.columns = (
         df.columns.str.strip()
@@ -54,7 +54,7 @@ def load_wards(engine):
     print("Loading wards...")
     wards = pd.DataFrame ({
         'ward_number': range(1, 15),
-        'ward_name': [f'Ward {i}' for i in rage(1, 15)]
+        'ward_name': [f'Ward {i}' for i in range(1, 15)]
     })
     wards.to_sql('ward', engine, if_exists='append', index=False)
     print("Loaded wards.")
@@ -86,7 +86,7 @@ def load_ward_disorder(engine):
     print("Loading ward disorder...")
     df = load_csv("_Ward_Disorder.csv")
     disorder_df = pd.DataFrame({
-        'ward_number': ['ward'],
+        'ward_number': df['ward'],
         'total': df['total_disorder'],
         'rate_per_1000': df['rate_per_1000_residents']
     })
@@ -257,7 +257,7 @@ def load_election_data(engine):
 
     candidate_id_map = dict(zip(candidates['name'], candidates['candidate_id']))
     candidacies=[]
-    for _, row in df.interrows():
+    for _, row in df.iterrows():
         candidate_id = candidate_id_map[row['candidatename']]
         if row['officetype'] == 'MAYOR':
             race_id = race_df[race_df['type'] == 'MAYOR']['race_id'].values[0]
@@ -273,11 +273,11 @@ def load_election_data(engine):
     candidacy_df.to_sql('candidacy', engine, if_exists='append', index=False)
 
     stations = df [['votingstationcode', 'ward', 'votingstation', 'votingstationtype']].drop_duplicates()
-    stations.columns = ['station_code', 'ward_number', 'station_name', 'stationg_type']
+    stations.columns = ['station_code', 'ward_number', 'station_name', 'station_type']
     stations.to_sql('voting_station', engine, if_exists='append', index=False)
 
     results=[]
-    for _, row in df.interrows():
+    for _, row in df.iterrows():
         candidate_id = candidate_id_map[row['candidatename']]
         if row['officetype'] == "MAYOR":
             race_id = race_df[race_df['type'] == 'MAYOR']['race_id'].values[0]
@@ -301,7 +301,7 @@ def run_script():
     try:
         engine = get_engine()
     except Exception as e:
-        print("Failed to connect to DB: {e}")
+        print(f"Failed to connect to DB: {e}")
         sys.exit(1)
 
     try:
@@ -320,7 +320,7 @@ def run_script():
         load_election_data(engine)
         print("Success.")
     except Exception as e:
-        print("Failed to load data: {e}.")
+        print(f"Failed to load data: {e}.")
         import traceback
         traceback.print_exc()
         sys.exit(1)
