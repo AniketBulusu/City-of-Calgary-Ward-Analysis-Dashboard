@@ -1,21 +1,25 @@
 from pathlib import Path
-
 import pandas as pd
-
 import plotly.express as px
 import plotly.graph_objects as go 
-
 from dash import Dash, dcc, html, Input, Output, State, dash_table, callback
 import dash_bootstrap_components as dbc
-
 import json
-
 from shapely import wkt 
 from shapely.geometry import shape
+from sqlalchemy import create_engine
+import os
 
 # Define base path for project, allows datasets to be reachable
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "datasets"
+
+DATABASE_URL = os.getenv(
+    "DATABSE_URL",
+    "postgresql+psycopg2://appuser:app_password@localhost:5432/calgary_ward_db",
+)
+
+engine = create_engine(DATABASE_URL)
 
 # Basic data standardization
 # allows consistent behavior when interacting with the data

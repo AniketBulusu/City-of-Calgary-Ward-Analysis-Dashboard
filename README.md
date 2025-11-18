@@ -1,6 +1,7 @@
 # CPSC471P
+### Authors: Sam Safe, Aniket Bulusu, Sultan Alzoghaibi
 
-
+# Calgary Ward
 
 ## Getting started
 

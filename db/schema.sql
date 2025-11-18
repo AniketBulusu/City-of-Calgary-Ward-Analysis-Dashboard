@@ -18,14 +18,14 @@ DROP TABLE IF EXISTS ward_crime CASCADE;
 DROP TABLE IF EXISTS ward_disorder CASCADE;
 DROP TABLE IF EXISTS ward_transit_stops CASCADE;
 DROP TABLE IF EXISTS ward_recreation CASCADE;
-DROP TABLE IF EXISTS ward_services CASCADE;
+DROP TABLE IF EXISTS community_services CASCADE;
 DROP TABLE IF EXISTS ward CASCADE;
 
 -- create tables
 
 CREATE TABLE ward (
     ward_number INTEGER PRIMARY KEY,
-    ward_name VARCHAR(100),
+    ward_name VARCHAR(100)
 );
 
 COMMENT ON TABLE ward IS 'Referential table - all characteristics will reference this table.';
@@ -39,7 +39,7 @@ CREATE TABLE election (
     UNIQUE(year, election_type)
 );
 
-COMMENT ON TABLE election IS 'Individual election events are represented in this table.'
+COMMENT ON TABLE election IS 'Individual election events are represented in this table.';
 
 CREATE TABLE race (
     race_id SERIAL PRIMARY KEY,
@@ -49,8 +49,8 @@ CREATE TABLE race (
     UNIQUE(election_id, type, ward_number)
 );
 
-COMMENT ON TABLE race IS 'Individual races in an election event - mayor or councillor.'
-COMMENT ON COLUMN race.ward_number IS 'NULL for city-wide mayoral race, specific wards for councillor.'
+COMMENT ON TABLE race IS 'Individual races in an election event - mayor or councillor.';
+COMMENT ON COLUMN race.ward_number IS 'NULL for city-wide mayoral race, specific wards for councillor.';
 
 CREATE TABLE candidate (
     candidate_id SERIAL PRIMARY KEY,
@@ -59,7 +59,7 @@ CREATE TABLE candidate (
     UNIQUE(name)
 );
 
-COMMENT ON TABLE candidate IS 'Candidates running in elections are here.'
+COMMENT ON TABLE candidate IS 'Candidates running in elections are here.';
 
 CREATE TABLE candidacy (
     candidate_id INTEGER NOT NULL REFERENCES candidate(candidate_id),
@@ -67,7 +67,7 @@ CREATE TABLE candidacy (
     PRIMARY KEY (candidate_id, race_id)
 );
 
-COMMENT ON TABLE candidacy IS 'Link between candidates to races.'
+COMMENT ON TABLE candidacy IS 'Link between candidates to races.';
 
 CREATE TABLE voting_station (
     station_code INTEGER PRIMARY KEY,
@@ -76,7 +76,7 @@ CREATE TABLE voting_station (
     station_type VARCHAR(50) -- different types indicates in csv are advance, regular, etc.
 );
 
-COMMENT ON TABLE voting_station IS 'Physical voting locations, identifiable by ward.'
+COMMENT ON TABLE voting_station IS 'Physical voting locations, identifiable by ward.';
 
 CREATE TABLE election_result (
     station_code INTEGER NOT NULL REFERENCES voting_station(station_code),
@@ -86,7 +86,7 @@ CREATE TABLE election_result (
     PRIMARY KEY (station_code, candidate_id, race_id)
 );
 
-COMMENT ON TABLE election_result IS 'Details on vote counts by station.'
+COMMENT ON TABLE election_result IS 'Details on vote counts by station.';
 
 CREATE TABLE ward_population (
     ward_number INTEGER PRIMARY KEY REFERENCES ward(ward_number),
@@ -95,7 +95,7 @@ CREATE TABLE ward_population (
     total_households INTEGER
 );
 
-COMMENT ON TABLE ward_population IS 'Ward population statistics.'
+COMMENT ON TABLE ward_population IS 'Ward population statistics.';
 
 CREATE TABLE ward_income (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
@@ -104,7 +104,7 @@ CREATE TABLE ward_income (
     PRIMARY KEY (ward_number, income_group)
 );
 
-COMMENT ON TABLE ward_income IS 'Household income distribution by ward, by income group.'
+COMMENT ON TABLE ward_income IS 'Household income distribution by ward, by income group.';
 
 CREATE TABLE ward_education (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
@@ -114,7 +114,7 @@ CREATE TABLE ward_education (
     PRIMARY KEY (ward_number, education_level)
 );
 
-COMMENT ON TABLE ward_education IS 'Education levels categorized by wards.'
+COMMENT ON TABLE ward_education IS 'Education levels categorized by wards.';
 
 CREATE TABLE ward_age_gender (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
@@ -125,7 +125,7 @@ CREATE TABLE ward_age_gender (
     PRIMARY KEY (ward_number, age_group)
 );
 
-COMMENT ON TABLE ward_age_gender IS 'Population by age group and gender.'
+COMMENT ON TABLE ward_age_gender IS 'Population by age group and gender.';
 
 CREATE TABLE ward_labour_force (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
@@ -142,7 +142,7 @@ CREATE TABLE ward_labour_force (
     PRIMARY KEY (ward_number, gender)
 );
 
-COMMENT ON TABLE ward_labour_force IS 'Labour force statistics by ward and gender.'
+COMMENT ON TABLE ward_labour_force IS 'Labour force statistics by ward and gender.';
 
 CREATE TABLE ward_transport_mode (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
@@ -152,7 +152,7 @@ CREATE TABLE ward_transport_mode (
     PRIMARY KEY (ward_number, transport_mode)
 );
 
-COMMENT ON TABLE ward_transport_mode IS 'Mode of commute to work by ward'
+COMMENT ON TABLE ward_transport_mode IS 'Mode of commute to work by ward';
 
 CREATE TABLE ward_crime (
     ward_number INTEGER PRIMARY KEY REFERENCES ward(ward_number),
@@ -160,7 +160,7 @@ CREATE TABLE ward_crime (
     rate_per_1000 DECIMAL(6, 2) NOT NULL
 );
 
-COMMENT ON TABLE ward_crime IS 'Crime stats by ward.'
+COMMENT ON TABLE ward_crime IS 'Crime stats by ward.';
 
 CREATE TABLE ward_disorder (
     ward_number INTEGER PRIMARY KEY REFERENCES ward(ward_number),
@@ -168,7 +168,7 @@ CREATE TABLE ward_disorder (
     rate_per_1000 DECIMAL(6,2) NOT NULL
 );
 
-COMMENT ON TABLE ward_disorder IS 'Disorder incidence per ward.'
+COMMENT ON TABLE ward_disorder IS 'Disorder incidence per ward.';
 
 CREATE TABLE ward_transit_stops (
     ward_number INTEGER PRIMARY KEY REFERENCES ward(ward_number),
@@ -177,7 +177,7 @@ CREATE TABLE ward_transit_stops (
     inactive INTEGER
 );
 
-COMMENT ON TABLE ward_transit_stops IS 'Public transit stop counts by ward.'
+COMMENT ON TABLE ward_transit_stops IS 'Public transit stop counts by ward.';
 
 CREATE TABLE ward_recreation (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
@@ -186,14 +186,14 @@ CREATE TABLE ward_recreation (
     PRIMARY KEY (ward_number, facility_type)
 );
 
-COMMENT ON TABLE ward_recreation IS 'Recreation facilities by type and by ward.'
+COMMENT ON TABLE ward_recreation IS 'Recreation facilities by type and by ward.';
 
-CREATE TABLE ward_services (
+CREATE TABLE community_services (
     ward_number INTEGER NOT NULL REFERENCES ward(ward_number),
     service_type VARCHAR(100) NOT NULL,
     count INTEGER NOT NULL,
     PRIMARY KEY (ward_number, service_type)
 );
 
-COMMENT ON TABLE ward_services IS 'Community service facilities by ward.'
+COMMENT ON TABLE community_services IS 'Community service facilities by ward.';
 
