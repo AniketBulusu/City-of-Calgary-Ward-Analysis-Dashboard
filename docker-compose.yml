@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: calgary-db
+    environment:
+      POSTGRES_DB: calgary_ward_db
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: app_password
+    ports:
+      - "5432:5432"     
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+
+  app:
+    build: .
+    container_name: calgary-app
+    depends_on:
+      - db
+    ports:
+      - "8050:8050"
+    environment:
+      # Dash app will use this to connect via SQLAlchemy
+      DATABASE_URL: postgresql+psycopg2://appuser:app_password@db:5432/calgary_ward_db
+    volumes:
+      # Live code reload (handy for dev)
+      - ./app:/app/app
+      - ./datasets:/app/datasets
+    command: ["python", "app/app.py"]
+
+volumes:
+  db_data:
