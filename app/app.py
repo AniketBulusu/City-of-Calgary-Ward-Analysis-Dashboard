@@ -82,7 +82,7 @@ app.layout = dbc.Container([
             ])
         ]),
         
-        dbc.Tab(label="📊 View Data", children=[
+        dbc.Tab(label="View Data", children=[
             dbc.Row([
                 dbc.Col([
                     html.H4("Dataset Viewer (SQL Queries)", className="mt-4 mb-3"),
