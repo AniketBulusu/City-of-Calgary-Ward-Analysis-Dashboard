@@ -29,7 +29,7 @@ CREATE TABLE ward (
 );
 
 COMMENT ON TABLE ward IS 'Referential table - all characteristics will reference this table.';
-COMMENT ON TABLE ward.ward_number IS 'Primary key: Ward number 1-14.';
+COMMENT ON COLUMN ward.ward_number IS 'Primary key: Ward number 1-14.';
 
 CREATE TABLE election (
     election_id SERIAL PRIMARY KEY,

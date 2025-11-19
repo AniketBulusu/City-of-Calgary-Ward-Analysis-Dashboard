@@ -31,48 +31,27 @@ def query_db(sql_query, params=None):
         print(f"Query was: {sql_query}")
         raise
 
+# TEST 
+
+try:
+    with engine.connect() as conn:
+        result = conn.execute(text("SELECT version();"))
+        version = result.fetchone()[0]
+        print("Database connected.")
+
+        result = conn.execute(text("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name;
+        """))
+        rables = [row[0] for row in result]
+        print (f'Found {len(tables)} tables: {', '.join(tables)}')
+except Exception as e:
+    print(f"Database error: {e}")
+
 # WARD BOUNDARY DATA - REPLACE WITH SULTAN'S CODE
-def load_ward_boundaries():
-    df = pd.read_csv(DATA_DIR / "_Ward_boundaries.csv")
-    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-    return df
 
-boundaries_df = load_ward_boundaries()
-
-def process_boundaries(df):
-    geojson_features = []
-    for i, row in df.iterrows():
-        try:
-            geom = wkt.loads(row['multipolygon'])
-            feature = {
-                'type': 'Feature', 
-                'geometry': shape(geom).__geo_interface__,
-                'properties' : {
-                    'ward_num': int(row['ward_num']),
-                    'councillor': row['councillor'],
-                    'label': row['label']
-                }
-            }
-            geojson_features.append(feature)
-        except Exception as e:
-            print(f"Error processing {row.get('ward_num', 'unknown')}: {e}")
-    return {
-        'type': 'FeatureCollection',
-        'features': geojson_features
-    }
-
-ward_geojson = process_boundaries(boundaries_df)
-
-def get_voter_turnout():
-    sql = 'SELECT * FROM ward_voter_turnout ORDER BY ward_number'
-    return query_db(sql)
-
-def get_election_winners():
-    sql = 'SELECT * FROM ward_election_winners ORDER BY ward_number'
-    return query_db(sql)
-
-turnout_df = get_voter_turnout()
-winners_df = get_election_winners()
 
 # Build APP layout
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -82,11 +61,12 @@ app.layout = dbc.Container([
         dbc.Col([
             html.H1("Calgary Ward Analysis Dashboard", className="text-center mb-4 mt-4"),
             html.P("Built using PostgreSQL, Python, Plotly, Dash, PgAdmin, pandas, SQLAlchemy, Shapely", className="text-center text-muted"),
+            html.P("Authors: Sam Safe, Aniket Bulusu, Sultan Alzoghaibi", className='text-center text-muted'),
         ])
     ]),
     
     dbc.Tabs([
-        dbc.Tab(label="🗺️ Ward Map", children=[
+        dbc.Tab(label="Ward Map", children=[
             dbc.Row([
                 dbc.Col([
                     html.H4("Calgary Ward Map", className="mt-3"),
