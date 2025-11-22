@@ -53,7 +53,7 @@ PYTHON
 
 if [ "$WARD_COUNT" -eq 0 ]; then
     echo "No data found. Loading data..."
-    python app/load_data.py
+    python app/loader.py
     
     if [ $? -eq 0 ]; then
         echo "Data loaded successfully!"

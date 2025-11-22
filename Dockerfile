@@ -16,9 +16,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 COPY datasets ./datasets
+COPY entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 ENV DATABASE_URL=postgresql+psycopg2://appuser:app_password@db:5432/calgary_ward_db
 
 EXPOSE 8050
 
-CMD ["python", "app/app.py"]
+ENTRYPOINT ["/entrypoint.sh"]
