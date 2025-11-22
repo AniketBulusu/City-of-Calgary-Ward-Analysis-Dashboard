@@ -2,7 +2,7 @@
 
 import pandas as pd
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from pathlib import Path
 import sys
 import time
@@ -27,16 +27,17 @@ def get_engine():
         try:
             engine = create_engine(DATABASE_URL)
             with engine.connect() as conn:
-                conn.execute("SELECT 1")
-            print('Connected to database.')
+                conn.execute(text("SELECT 1"))
+            print("Connected to database.")
             return engine
         except Exception as e:
             if attempt < retry - 1:
-                print("Waiting for DB... (attempt {attempt + 1}/{retry})")
+                print(f"Waiting for DB... (attempt {attempt + 1}/{retry})")
                 time.sleep(delay)
             else:
                 print(f"Database connection failed after {retry} attempts: {e}")
                 raise
+
 
 # data standardiser
 def load_csv(filename):
@@ -48,6 +49,23 @@ def load_csv(filename):
         .str.replace("/", "_")
     )
     return df
+
+################# ENORMOUS DATA TABLE HAS MANY PROBLEMS TO TROUBLESHOOT
+# reset was done for debugging, but kept to make sure no problems arise
+def reset_election_tables(engine):
+    print("Resetting election-related tables...")
+    with engine.begin() as conn:
+        conn.execute(text("""
+            TRUNCATE election_result,
+                     voting_station,
+                     candidacy,
+                     candidate,
+                     race,
+                     election
+            RESTART IDENTITY CASCADE;
+        """))
+    print("Election-related tables truncated.")
+
 
 ####################################### LOADER FUNCITONS ######################################
 def load_wards(engine):
@@ -210,12 +228,40 @@ def load_community_services(engine):
                     'count': row[service_type]
                 })
     services_df = pd.DataFrame(records)
-    services_df.to_sql('ward_services', engine, if_exists='append', index=False)
+    services_df.to_sql('community_services', engine, if_exists='append', index=False)
     print("Loaded community services.")
 
 def load_election_data(engine):
     print('Loading election data...')
+    reset_election_tables(engine)
     df = load_csv("_Ward_Election_Results.csv")
+
+################################################## DATA CLEANING REQUIRED TO AVOID 0 
+
+    # --- Clean ward numbers ---
+    df = df[df['ward'].notna()]
+    df['ward'] = df['ward'].astype(int)
+    df = df[(df['ward'] >= 1) & (df['ward'] <= 14)]
+
+    # --- Clean numeric fields with commas ---
+    df['votingstationcode'] = (
+        df['votingstationcode']
+        .astype(str)
+        .str.replace(',', '', regex=False)
+        .astype(int)
+    )
+
+    df['votes'] = (
+        df['votes']
+        .astype(str)
+        .str.replace(',', '', regex=False)
+        .astype(int)
+    )
+
+    df = df.drop_duplicates(
+        subset=['votingstationcode', 'candidatename', 'officetype', 'ward'],
+        keep='first'
+    )
 
     election_data = {
         'election_id': [1],
@@ -226,8 +272,9 @@ def load_election_data(engine):
     election_df = pd.DataFrame(election_data)
     election_df.to_sql('election', engine, if_exists='append', index=False)
 
-    races= []
+    races = []
     race_id = 1
+
     if 'MAYOR' in df['officetype'].values:
         races.append({
             'race_id': race_id,
@@ -236,16 +283,17 @@ def load_election_data(engine):
             'ward_number': None
         })
         race_id += 1
-    
-    for ward_num in sorted(df['ward'].unique()):
+
+    ward_numbers = sorted(df['ward'].unique())
+    for ward_num in ward_numbers:
         races.append({
             'race_id': race_id,
-            'election_id': 1, 
+            'election_id': 1,
             'type': 'COUNCILLOR',
-            'ward_number': ward_num
+            'ward_number': int(ward_num),
         })
         race_id += 1
-    
+
     race_df = pd.DataFrame(races)
     race_df.to_sql('race', engine, if_exists='append', index=False)
 
@@ -256,43 +304,64 @@ def load_election_data(engine):
     candidates.to_sql('candidate', engine, if_exists='append', index=False)
 
     candidate_id_map = dict(zip(candidates['name'], candidates['candidate_id']))
-    candidacies=[]
+
+    candidacies = []
     for _, row in df.iterrows():
         candidate_id = candidate_id_map[row['candidatename']]
         if row['officetype'] == 'MAYOR':
-            race_id = race_df[race_df['type'] == 'MAYOR']['race_id'].values[0]
+            mayor_race_id = race_df[race_df['type'] == 'MAYOR']['race_id'].values[0]
+            race_id_for_row = mayor_race_id
         else:
-            race_id = race_df [
-                (race_df['type'] == 'COUNCILLOR') & (race_df['ward_number'] == row['ward'])
+            race_id_for_row = race_df[
+                (race_df['type'] == 'COUNCILLOR') &
+                (race_df['ward_number'] == row['ward'])
             ]['race_id'].values[0]
+
         candidacies.append({
             'candidate_id': candidate_id,
-            'race_id': race_id
+            'race_id': race_id_for_row
         })
+
     candidacy_df = pd.DataFrame(candidacies).drop_duplicates()
     candidacy_df.to_sql('candidacy', engine, if_exists='append', index=False)
 
-    stations = df [['votingstationcode', 'ward', 'votingstation', 'votingstationtype']].drop_duplicates()
+    stations = df[['votingstationcode', 'ward', 'votingstation', 'votingstationtype']].drop_duplicates()
     stations.columns = ['station_code', 'ward_number', 'station_name', 'station_type']
+    stations = stations.drop_duplicates(subset=['station_code'], keep='first')
     stations.to_sql('voting_station', engine, if_exists='append', index=False)
 
-    results=[]
+    # --- Election results ---
+    results = []
     for _, row in df.iterrows():
         candidate_id = candidate_id_map[row['candidatename']]
+
         if row['officetype'] == "MAYOR":
-            race_id = race_df[race_df['type'] == 'MAYOR']['race_id'].values[0]
+            race_id_for_row = race_df[race_df['type'] == 'MAYOR']['race_id'].values[0]
         else:
-            race_id = race_df [
-                (race_df['type'] == 'COUNCILLOR') & (race_df['ward_number'] == row['ward'])
+            race_id_for_row = race_df[
+                (race_df['type'] == 'COUNCILLOR') &
+                (race_df['ward_number'] == row['ward'])
             ]['race_id'].values[0]
+
         results.append({
             'station_code': row['votingstationcode'],
             'candidate_id': candidate_id,
-            'race_id': race_id,
-            'votes': row['votes']
+            'race_id': race_id_for_row,
+            'votes': row['votes'],
         })
+
     results_df = pd.DataFrame(results)
+
+    # 🔑 Remove duplicate PK combinations before insert
+    results_df = results_df.drop_duplicates(
+        subset=['station_code', 'candidate_id', 'race_id'],
+        keep='first'
+    )
+
     results_df.to_sql('election_result', engine, if_exists='append', index=False)
+
+    print("Loaded election data.")
+
 
 ################################## MAIN SCRIPT ##########################################
 
