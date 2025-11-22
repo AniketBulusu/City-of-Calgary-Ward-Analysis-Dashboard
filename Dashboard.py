@@ -13,7 +13,7 @@ import numpy as np
 conn = psycopg2.connect(
     dbname="cpsc471",
     user="postgres",
-    password="GurgaonB78",
+    password="",
     host="localhost",
     port="5432"
 )
