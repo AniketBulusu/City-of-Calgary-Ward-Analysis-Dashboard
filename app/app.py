@@ -171,20 +171,28 @@ app.layout = dbc.Container(
                                                             id="curated-select",
                                                             options=[
                                                                 {
-                                                                    "label": "Turnout vs Population",
+                                                                    "label": "Turnout Rate by Ward Population",
                                                                     "value": "curated_population_turnout",
                                                                 },
                                                                 {
-                                                                    "label": "Economy & Turnout (Labour Force, Income)",
-                                                                    "value": "curated_economy_turnout",
+                                                                    "label": "Income Diversity and Voter Engagement",
+                                                                    "value": "curated_income_diversity",
                                                                 },
                                                                 {
-                                                                    "label": "Services, Safety & Turnout",
-                                                                    "value": "curated_services_safety",
+                                                                    "label": "Crime & Disorder vs Safety Perception",
+                                                                    "value": "curated_safety_profile",
                                                                 },
                                                                 {
-                                                                    "label": "Mayoral Candidates Across Wards",
-                                                                    "value": "curated_candidates",
+                                                                    "label": "Mayoral Race: Geographic Patterns",
+                                                                    "value": "curated_mayoral_geography",
+                                                                },
+                                                                {
+                                                                    "label": "Employment Rate vs Civic Engagement",
+                                                                    "value": "curated_employment_engagement",
+                                                                },
+                                                                {
+                                                                    "label": "Service Access & Quality of Life",
+                                                                    "value": "curated_service_quality",
                                                                 },
                                                             ],
                                                             value="curated_population_turnout",
@@ -325,27 +333,32 @@ app.layout = dbc.Container(
                                         dcc.Dropdown(
                                             id="dataset-dropdown",
                                             options=[
-                                                {'label': 'Ward List', 'value': 'ward_summary'},
+                                                # Core Reference Tables
+                                                {'label': 'Ward', 'value': 'ward'},
+                                                {'label': 'Election', 'value': 'election'},
+                                                {'label': 'Race', 'value': 'race'},
+                                                {'label': 'Candidate', 'value': 'candidate'},
+                                                {'label': 'Candidacy', 'value': 'candidacy'},
+                                                {'label': 'Voting Station', 'value': 'voting_station'},
+                                                {'label': 'Election Result', 'value': 'election_result'},
+                                                # Demographic Tables
                                                 {'label': 'Population', 'value': 'ward_population'},
+                                                {'label': 'Age & Gender', 'value': 'ward_age_gender'},
+                                                {'label': 'Income', 'value': 'ward_income'},
+                                                {'label': 'Education', 'value': 'ward_education'},
+                                                {'label': 'Labour Force', 'value': 'ward_labour_force'},
+                                                {'label': 'Transport Mode', 'value': 'ward_transport_mode'},
+                                                # Service & Safety Tables
                                                 {'label': 'Crime', 'value': 'ward_crime'},
                                                 {'label': 'Disorder', 'value': 'ward_disorder'},
-                                                {'label': 'Age & Gender', 'value': 'ward_age_gender'},
-                                                {'label': 'Education', 'value': 'ward_education'},
-                                                {'label': 'Income', 'value': 'ward_income'},
-                                                {'label': 'Labour Force', 'value': 'ward_labour_force'},
-                                                {'label': 'Transport Modes', 'value': 'ward_transport_mode'},
                                                 {'label': 'Transit Stops', 'value': 'ward_transit_stops'},
-                                                {'label': ' Recreation', 'value': 'ward_recreation'},
+                                                {'label': 'Recreation', 'value': 'ward_recreation'},
                                                 {'label': 'Community Services', 'value': 'community_services'},
-                                                {'label': 'Election Info', 'value': 'election'},
-                                                {'label': 'Races', 'value': 'race'},
-                                                {'label': 'Candidates', 'value': 'candidate'},
-                                                {'label': 'Voting Stations', 'value': 'voting_station'},
-                                                {'label': 'Election Results (Raw)', 'value': 'election_result'},
+                                                # Calculated Views
                                                 {'label': 'Voter Turnout (Calculated)', 'value': 'turnout'},
-                                                {'label': 'Election Winners', 'value': 'winners'},
+                                                {'label': 'Election Winners (Calculated)', 'value': 'winners'},
                                             ],
-                                            value='ward_summary',
+                                            value='ward',
                                             clearable=False,
                                             className="mb-4"
                                         ),
@@ -439,37 +452,90 @@ def store_selected_ward(click_data):
 
 @app.callback(
     Output("ward-detail-panel", "children"),
-    Output("ward-breakdown-charts", "children"),
     Input("selected-ward-store", "data"),
 )
 def update_ward_details(selected_ward):
     if not selected_ward or selected_ward.get("ward_number") is None:
-        return (
-            html.P("Select a ward on the map to view details.", className="text-muted"),
-            html.P("Ward-specific breakdowns will appear here.", className="text-muted"),
-        )
+        return html.P("Select a ward on the map to view details.", className="text-muted")
 
     ward_number = selected_ward["ward_number"]
-    population = "N/A"
-    turnout_rate = "N/A"
-    crime_rate = "N/A"
-    avg_income = "N/A"
-    winner = "N/A"
+    
+    # Query ward details
+    query = '''
+        SELECT 
+            w.ward_number,
+            w.ward_name,
+            wp.total as population,
+            wc.rate_per_1000 as crime_rate,
+            wd.rate_per_1000 as disorder_rate
+        FROM ward w
+        LEFT JOIN ward_population wp ON w.ward_number = wp.ward_number
+        LEFT JOIN ward_crime wc ON w.ward_number = wc.ward_number
+        LEFT JOIN ward_disorder wd ON w.ward_number = wd.ward_number
+        WHERE w.ward_number = :ward_num
+    '''
+    
+    try:
+        df = query_db(query, params={'ward_num': ward_number})
+        
+        if df.empty:
+            return html.P(f"No data available for Ward {ward_number}", className="text-warning")
+        
+        row = df.iloc[0]
+        population = f"{row['population']:,}" if pd.notna(row['population']) else "N/A"
+        crime_rate = f"{row['crime_rate']:.1f}" if pd.notna(row['crime_rate']) else "N/A"
+        disorder_rate = f"{row['disorder_rate']:.1f}" if pd.notna(row['disorder_rate']) else "N/A"
+        
+        # Get turnout and winner
+        turnout_query = '''
+            SELECT
+                ROUND(100.0 * SUM(er.votes)::numeric / wp.total, 2) as turnout_rate
+            FROM election_result er
+            JOIN voting_station vs ON er.station_code = vs.station_code
+            JOIN ward_population wp ON vs.ward_number = wp.ward_number
+            JOIN race r ON er.race_id = r.race_id
+            WHERE vs.ward_number = :ward_num AND r.type = 'MAYOR'
+            GROUP BY wp.total
+        '''
+        
+        winner_query = '''
+            WITH ward_votes AS (
+                SELECT
+                    c.name,
+                    SUM(er.votes) as total_votes
+                FROM election_result er
+                JOIN candidate c ON er.candidate_id = c.candidate_id
+                JOIN race r ON er.race_id = r.race_id
+                JOIN voting_station vs ON er.station_code = vs.station_code
+                WHERE vs.ward_number = :ward_num AND r.type = 'MAYOR'
+                GROUP BY c.name
+                ORDER BY total_votes DESC
+                LIMIT 1
+            )
+            SELECT name as winner FROM ward_votes
+        '''
+        
+        turnout_df = query_db(turnout_query, params={'ward_num': ward_number})
+        winner_df = query_db(winner_query, params={'ward_num': ward_number})
+        
+        turnout_rate = f"{turnout_df.iloc[0]['turnout_rate']}%" if not turnout_df.empty else "N/A"
+        winner = winner_df.iloc[0]['winner'] if not winner_df.empty else "N/A"
+        
+        detail_children = [
+            html.H5(f"Ward {ward_number}", className="mb-3"),
+            make_metric_card("Population", population),
+            make_metric_card("Turnout Rate", turnout_rate, "Mayoral race"),
+            make_metric_card("Crime Rate", crime_rate, "Per 1,000 residents"),
+            make_metric_card("Disorder Rate", disorder_rate, "Per 1,000 residents"),
+            make_metric_card("Top Mayoral Candidate", winner, "Most votes in ward"),
+        ]
+        
+        return detail_children
+        
+    except Exception as e:
+        print(f"Error in ward details: {e}")
+        return html.P(f"Error loading data for Ward {ward_number}", className="text-danger")
 
-    detail_children = [
-        html.H5(f"Ward {ward_number}", className="mb-3"),
-        make_metric_card("Population", str(population)),
-        make_metric_card("Turnout Rate", str(turnout_rate)),
-        make_metric_card("Crime Rate (per 1,000)", str(crime_rate)),
-        make_metric_card("Average Household Income", str(avg_income)),
-        make_metric_card("Winning Mayoral Candidate", str(winner)),
-    ]
-
-    breakdown_children = [
-        html.P(f"Mini-charts for Ward {ward_number} will go here.", className="text-muted")
-    ]
-
-    return detail_children, breakdown_children
 
 
 # ---- Curated Sets ----
@@ -483,23 +549,297 @@ def update_curated_visualization(curated_id):
     fig = go.Figure()
 
     if curated_id == "curated_population_turnout":
-        fig.update_layout(title="Turnout vs Population (placeholder)", xaxis_title="Ward", yaxis_title="Value")
-        desc = "This visualization will compare ward population to total voter turnout."
+        # Query: Population vs Turnout Rate
+        query = '''
+            SELECT
+                vs.ward_number,
+                wp.total as population,
+                SUM(er.votes) as total_votes,
+                ROUND(100.0 * SUM(er.votes)::numeric / wp.total, 2) as turnout_rate
+            FROM election_result er
+            JOIN voting_station vs ON er.station_code = vs.station_code
+            JOIN ward_population wp ON vs.ward_number = wp.ward_number
+            JOIN race r ON er.race_id = r.race_id
+            WHERE r.type = 'MAYOR'
+            GROUP BY vs.ward_number, wp.total
+            ORDER BY wp.total
+        '''
+        df = query_db(query)
+        
+        fig = px.scatter(
+            df, 
+            x='population', 
+            y='turnout_rate',
+            text='ward_number',
+            title='Voter Turnout Rate by Ward Population',
+            labels={'population': 'Ward Population', 'turnout_rate': 'Turnout Rate (%)'},
+            size='total_votes',
+            size_max=20
+        )
+        fig.update_traces(textposition='top center', marker=dict(line=dict(width=1, color='white')))
+        fig.update_layout(height=600, showlegend=False)
+        
+        desc = "Examines whether larger wards have different civic engagement patterns. Each bubble represents a ward, sized by total votes cast."
 
-    elif curated_id == "curated_economy_turnout":
-        fig.update_layout(title="Economy & Turnout (placeholder)", xaxis_title="Economic Measures", yaxis_title="Turnout")
-        desc = "This visualization will connect labour force participation and household income to voter turnout."
+    elif curated_id == "curated_income_diversity":
+        # Query: Income distribution spread vs turnout
+        query = '''
+            WITH income_stats AS (
+                SELECT 
+                    wi.ward_number,
+                    SUM(wi.household_count) as total_households,
+                    SUM(CASE WHEN wi.income_group IN ('Under $20,000', '$20,000 to $39,999') 
+                        THEN wi.household_count ELSE 0 END) as low_income,
+                    SUM(CASE WHEN wi.income_group IN ('$200,000 and over') 
+                        THEN wi.household_count ELSE 0 END) as high_income
+                FROM ward_income wi
+                GROUP BY wi.ward_number
+            ),
+            turnout_stats AS (
+                SELECT
+                    vs.ward_number,
+                    SUM(er.votes) as total_votes,
+                    wp.total as population,
+                    ROUND(100.0 * SUM(er.votes)::numeric / wp.total, 2) as turnout_rate
+                FROM election_result er
+                JOIN voting_station vs ON er.station_code = vs.station_code
+                JOIN ward_population wp ON vs.ward_number = wp.ward_number
+                JOIN race r ON er.race_id = r.race_id
+                WHERE r.type = 'MAYOR'
+                GROUP BY vs.ward_number, wp.total
+            )
+            SELECT 
+                i.ward_number,
+                ROUND(100.0 * i.low_income / i.total_households, 1) as low_income_pct,
+                ROUND(100.0 * i.high_income / i.total_households, 1) as high_income_pct,
+                t.turnout_rate
+            FROM income_stats i
+            JOIN turnout_stats t ON i.ward_number = t.ward_number
+            ORDER BY i.ward_number
+        '''
+        df = query_db(query)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df['low_income_pct'],
+            y=df['turnout_rate'],
+            mode='markers+text',
+            text=df['ward_number'],
+            textposition='top center',
+            name='Low Income vs Turnout',
+            marker=dict(size=12, color='#FF6B6B')
+        ))
+        fig.add_trace(go.Scatter(
+            x=df['high_income_pct'],
+            y=df['turnout_rate'],
+            mode='markers+text',
+            text=df['ward_number'],
+            textposition='bottom center',
+            name='High Income vs Turnout',
+            marker=dict(size=12, color='#4ECDC4')
+        ))
+        fig.update_layout(
+            title='Income Levels and Voter Turnout',
+            xaxis_title='Percentage of Households',
+            yaxis_title='Turnout Rate (%)',
+            height=600
+        )
+        
+        desc = "Compares low-income households (under $40k) and high-income households ($200k+) against turnout rates. Red shows low-income correlation, teal shows high-income correlation."
 
-    elif curated_id == "curated_services_safety":
-        fig.update_layout(title="Services, Safety & Turnout (placeholder)", xaxis_title="Service / Safety Index", yaxis_title="Turnout")
-        desc = "This visualization will examine whether access to community services and crime levels are associated with turnout."
+    elif curated_id == "curated_safety_profile":
+        # Query: Crime and disorder rates
+        query = '''
+            SELECT 
+                wc.ward_number,
+                wc.rate_per_1000 as crime_rate,
+                wd.rate_per_1000 as disorder_rate,
+                ROUND((wc.rate_per_1000 + wd.rate_per_1000) / 2, 1) as combined_safety_index
+            FROM ward_crime wc
+            JOIN ward_disorder wd ON wc.ward_number = wd.ward_number
+            ORDER BY combined_safety_index DESC
+        '''
+        df = query_db(query)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=df['ward_number'],
+            y=df['crime_rate'],
+            name='Crime Rate',
+            marker_color='#E74C3C'
+        ))
+        fig.add_trace(go.Bar(
+            x=df['ward_number'],
+            y=df['disorder_rate'],
+            name='Disorder Rate',
+            marker_color='#F39C12'
+        ))
+        fig.update_layout(
+            title='Crime and Disorder Rates by Ward',
+            xaxis_title='Ward Number',
+            yaxis_title='Rate per 1,000 Residents',
+            barmode='group',
+            height=600
+        )
+        
+        desc = "Shows crime and disorder rates across wards. Higher rates indicate greater public safety challenges. Wards 7, 8, 9, and 10 show significantly higher rates."
 
-    elif curated_id == "curated_candidates":
-        fig.update_layout(title="Mayoral Candidates Across Wards (placeholder)", xaxis_title="Ward", yaxis_title="Votes")
-        desc = "This visualization will highlight where different mayoral candidates performed best."
+    elif curated_id == "curated_mayoral_geography":
+        # Query: Top mayoral candidates by ward
+        query = '''
+            WITH candidate_votes AS (
+                SELECT
+                    vs.ward_number,
+                    c.name as candidate_name,
+                    SUM(er.votes) as votes
+                FROM election_result er
+                JOIN candidate c ON er.candidate_id = c.candidate_id
+                JOIN race r ON er.race_id = r.race_id
+                JOIN voting_station vs ON er.station_code = vs.station_code
+                WHERE r.type = 'MAYOR'
+                GROUP BY vs.ward_number, c.name
+            ),
+            top_candidates AS (
+                SELECT DISTINCT candidate_name
+                FROM candidate_votes
+                GROUP BY candidate_name
+                ORDER BY SUM(votes) DESC
+                LIMIT 6
+            )
+            SELECT 
+                cv.ward_number,
+                cv.candidate_name,
+                cv.votes
+            FROM candidate_votes cv
+            WHERE cv.candidate_name IN (SELECT candidate_name FROM top_candidates)
+            ORDER BY cv.ward_number, cv.votes DESC
+        '''
+        df = query_db(query)
+        
+        fig = px.bar(
+            df,
+            x='ward_number',
+            y='votes',
+            color='candidate_name',
+            title='Top 6 Mayoral Candidates: Vote Distribution by Ward',
+            labels={'ward_number': 'Ward Number', 'votes': 'Votes', 'candidate_name': 'Candidate'},
+            barmode='stack',
+            height=600
+        )
+        fig.update_xaxis(dtick=1)
+        
+        desc = "Shows geographic patterns in mayoral candidate support. Each color represents one of the top 6 candidates, revealing which wards favored which candidates."
+
+    elif curated_id == "curated_employment_engagement":
+        # Query: Employment rate vs turnout
+        query = '''
+            WITH employment AS (
+                SELECT 
+                    ward_number,
+                    AVG(employment_rate) as avg_employment_rate
+                FROM ward_labour_force
+                GROUP BY ward_number
+            ),
+            turnout AS (
+                SELECT
+                    vs.ward_number,
+                    wp.total as population,
+                    SUM(er.votes) as total_votes,
+                    ROUND(100.0 * SUM(er.votes)::numeric / wp.total, 2) as turnout_rate
+                FROM election_result er
+                JOIN voting_station vs ON er.station_code = vs.station_code
+                JOIN ward_population wp ON vs.ward_number = wp.ward_number
+                JOIN race r ON er.race_id = r.race_id
+                WHERE r.type = 'MAYOR'
+                GROUP BY vs.ward_number, wp.total
+            )
+            SELECT 
+                e.ward_number,
+                e.avg_employment_rate,
+                t.turnout_rate
+            FROM employment e
+            JOIN turnout t ON e.ward_number = t.ward_number
+            ORDER BY e.ward_number
+        '''
+        df = query_db(query)
+        
+        fig = px.scatter(
+            df,
+            x='avg_employment_rate',
+            y='turnout_rate',
+            text='ward_number',
+            title='Employment Rate vs Voter Turnout',
+            labels={'avg_employment_rate': 'Employment Rate (%)', 'turnout_rate': 'Voter Turnout Rate (%)'},
+            trendline='ols',
+            height=600
+        )
+        fig.update_traces(textposition='top center', marker=dict(size=12))
+        
+        desc = "Explores whether wards with higher employment rates show different civic engagement levels. Includes trendline to show correlation."
+
+    elif curated_id == "curated_service_quality":
+        # Query: Services per capita vs population
+        query = '''
+            WITH service_counts AS (
+                SELECT 
+                    ward_number,
+                    SUM(count) as total_services
+                FROM community_services
+                GROUP BY ward_number
+            ),
+            recreation_counts AS (
+                SELECT 
+                    ward_number,
+                    SUM(count) as total_recreation
+                FROM ward_recreation
+                GROUP BY ward_number
+            ),
+            transit_counts AS (
+                SELECT 
+                    ward_number,
+                    active as transit_stops
+                FROM ward_transit_stops
+            )
+            SELECT 
+                wp.ward_number,
+                wp.total as population,
+                COALESCE(sc.total_services, 0) as services,
+                COALESCE(rc.total_recreation, 0) as recreation,
+                COALESCE(tc.transit_stops, 0) as transit_stops,
+                ROUND((COALESCE(sc.total_services, 0) + COALESCE(rc.total_recreation, 0)) * 1000.0 / wp.total, 2) as services_per_1000
+            FROM ward_population wp
+            LEFT JOIN service_counts sc ON wp.ward_number = sc.ward_number
+            LEFT JOIN recreation_counts rc ON wp.ward_number = rc.ward_number
+            LEFT JOIN transit_counts tc ON wp.ward_number = tc.ward_number
+            ORDER BY services_per_1000 DESC
+        '''
+        df = query_db(query)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=df['ward_number'],
+            y=df['services'],
+            name='Community Services',
+            marker_color='#3498DB'
+        ))
+        fig.add_trace(go.Bar(
+            x=df['ward_number'],
+            y=df['recreation'],
+            name='Recreation Facilities',
+            marker_color='#2ECC71'
+        ))
+        fig.update_layout(
+            title='Service and Recreation Facility Distribution by Ward',
+            xaxis_title='Ward Number',
+            yaxis_title='Number of Facilities',
+            barmode='stack',
+            height=600
+        )
+        
+        desc = "Compares community services and recreation facilities across wards. Reveals which wards have better access to public amenities and quality of life infrastructure."
 
     else:
-        fig.update_layout(title="Select a curated set")
+        fig.update_layout(title="Select a curated visualization")
         desc = "Select a curated set from the dropdown."
 
     return fig, desc
@@ -540,77 +880,65 @@ def update_custom_visualization(n_clicks, characteristic, politics):
 )
 def update_dataset_view(selected_dataset):
     table_queries = {
-        'ward_summary': {
+        # Core Reference Tables
+        'ward': {
             'sql': 'SELECT * FROM ward ORDER BY ward_number',
             'description': 'All Calgary wards (1-14)'
         },
-        'ward_population': {
-            'sql': 'SELECT * FROM ward_population ORDER BY ward_number',
-            'description': 'Population statistics by ward'
-        },
-        'ward_crime': {
-            'sql': 'SELECT * FROM ward_crime ORDER BY ward_number',
-            'description': 'Crime statistics by ward'
-        },
-        'ward_disorder': {
-            'sql': 'SELECT * FROM ward_disorder ORDER BY ward_number',
-            'description': 'Disorder incidents by ward'
-        },
-        'ward_age_gender': {
-            'sql': 'SELECT * FROM ward_age_gender ORDER BY ward_number, age_group LIMIT 100',
-            'description': 'Population by age and gender (first 100 rows)'
-        },
-        'ward_education': {
-            'sql': 'SELECT * FROM ward_education ORDER BY ward_number, education_level LIMIT 100',
-            'description': 'Education levels by ward (first 100 rows)'
-        },
-        'ward_income': {
-            'sql': 'SELECT * FROM ward_income ORDER BY ward_number, income_group LIMIT 100',
-            'description': 'Household income distribution (first 100 rows)'
-        },
-        'ward_labour_force': {
-            'sql': 'SELECT * FROM ward_labour_force ORDER BY ward_number, gender',
-            'description': 'Labour force statistics'
-        },
-        'ward_transport_mode': {
-            'sql': 'SELECT * FROM ward_transport_mode ORDER BY ward_number, transport_mode LIMIT 100',
-            'description': 'Transportation modes (first 100 rows)'
-        },
-        'ward_transit_stops': {
-            'sql': 'SELECT * FROM ward_transit_stops ORDER BY ward_number',
-            'description': 'Transit stops by ward'
-        },
-        'ward_recreation': {
-            'sql': 'SELECT * FROM ward_recreation ORDER BY ward_number, facility_type LIMIT 100',
-            'description': 'Recreation facilities (first 100 rows)'
-        },
-        'community_services': {
-            'sql': 'SELECT * FROM community_services ORDER BY ward_number, service_type LIMIT 100',
-            'description': 'Community services (first 100 rows)'
-        },
         'election': {
-            'sql': 'SELECT * FROM election',
-            'description': '2021 Municipal Election'
+            'sql': 'SELECT * FROM election ORDER BY election_date DESC',
+            'description': 'Election events'
         },
         'race': {
-            'sql': 'SELECT * FROM race ORDER BY race_id',
-            'description': 'Election races (Mayor + 14 Councillors)'
+            'sql': '''
+                SELECT 
+                    r.race_id,
+                    e.year,
+                    r.type,
+                    r.ward_number,
+                    CASE 
+                        WHEN r.type = 'MAYOR' THEN 'City-wide'
+                        ELSE 'Ward ' || r.ward_number::text
+                    END as scope
+                FROM race r
+                JOIN election e ON r.election_id = e.election_id
+                ORDER BY e.year DESC, r.type, r.ward_number
+            ''',
+            'description': 'Election races (Mayor + Councillor by ward)'
         },
         'candidate': {
-            'sql': 'SELECT * FROM candidate ORDER BY name LIMIT 100',
-            'description': 'Candidates (first 100)'
+            'sql': 'SELECT * FROM candidate ORDER BY name',
+            'description': 'All candidates'
+        },
+        'candidacy': {
+            'sql': '''
+                SELECT 
+                    c.name as candidate_name,
+                    r.type as race_type,
+                    CASE 
+                        WHEN r.type = 'MAYOR' THEN 'City-wide'
+                        ELSE 'Ward ' || r.ward_number::text
+                    END as race_scope,
+                    e.year
+                FROM candidacy cy
+                JOIN candidate c ON cy.candidate_id = c.candidate_id
+                JOIN race r ON cy.race_id = r.race_id
+                JOIN election e ON r.election_id = e.election_id
+                ORDER BY e.year DESC, r.type, r.ward_number, c.name
+            ''',
+            'description': 'Candidate participation in races'
         },
         'voting_station': {
-            'sql': 'SELECT * FROM voting_station ORDER BY ward_number, station_code LIMIT 100',
-            'description': 'Voting stations (first 100)'
+            'sql': 'SELECT * FROM voting_station ORDER BY ward_number, station_code',
+            'description': 'Physical voting locations by ward'
         },
         'election_result': {
             'sql': '''
                 SELECT 
                     er.station_code,
+                    vs.ward_number,
                     c.name as candidate_name,
                     r.type as race_type,
-                    vs.ward_number,
                     er.votes
                 FROM election_result er
                 JOIN candidate c ON er.candidate_id = c.candidate_id
@@ -619,8 +947,58 @@ def update_dataset_view(selected_dataset):
                 ORDER BY vs.ward_number, er.station_code, er.votes DESC
                 LIMIT 200
             ''',
-            'description': 'Election results with candidate names (200 of ~47,000 rows)'
+            'description': 'Raw election results by voting station (showing first 200 of ~47,000 rows)'
         },
+        
+        # Demographic Tables
+        'ward_population': {
+            'sql': 'SELECT * FROM ward_population ORDER BY ward_number',
+            'description': 'Population statistics by ward'
+        },
+        'ward_age_gender': {
+            'sql': 'SELECT * FROM ward_age_gender ORDER BY ward_number, age_group',
+            'description': 'Population by age group and gender'
+        },
+        'ward_income': {
+            'sql': 'SELECT * FROM ward_income ORDER BY ward_number, income_group',
+            'description': 'Household income distribution by ward'
+        },
+        'ward_education': {
+            'sql': 'SELECT * FROM ward_education ORDER BY ward_number, education_level',
+            'description': 'Education levels by ward'
+        },
+        'ward_labour_force': {
+            'sql': 'SELECT * FROM ward_labour_force ORDER BY ward_number, gender',
+            'description': 'Labour force statistics by ward and gender'
+        },
+        'ward_transport_mode': {
+            'sql': 'SELECT * FROM ward_transport_mode ORDER BY ward_number, transport_mode',
+            'description': 'Commute modes to work by ward'
+        },
+        
+        # Service & Safety Tables
+        'ward_crime': {
+            'sql': 'SELECT * FROM ward_crime ORDER BY ward_number',
+            'description': 'Crime statistics by ward'
+        },
+        'ward_disorder': {
+            'sql': 'SELECT * FROM ward_disorder ORDER BY ward_number',
+            'description': 'Disorder incidents by ward'
+        },
+        'ward_transit_stops': {
+            'sql': 'SELECT * FROM ward_transit_stops ORDER BY ward_number',
+            'description': 'Public transit stop counts by ward'
+        },
+        'ward_recreation': {
+            'sql': 'SELECT * FROM ward_recreation ORDER BY ward_number, facility_type',
+            'description': 'Recreation facilities by type and ward'
+        },
+        'community_services': {
+            'sql': 'SELECT * FROM community_services ORDER BY ward_number, service_type',
+            'description': 'Community service facilities by ward'
+        },
+        
+        # Calculated Views
         'turnout': {
             'sql': '''
                 SELECT
@@ -692,7 +1070,7 @@ def update_dataset_view(selected_dataset):
         
         if df.empty:
             return query_display, html.Div([
-                html.P("⚠️ Query returned no rows - table might be empty.", className="text-warning"),
+                html.P("Query returned no rows - table might be empty.", className="text-warning"),
                 html.P("Run the ETL script:", className="text-muted small"),
                 html.Pre("docker-compose exec app python app/load_data.py", className="small bg-light p-2")
             ])
@@ -729,7 +1107,7 @@ def update_dataset_view(selected_dataset):
         error_detail = traceback.format_exc()
         
         error_display = html.Div([
-            html.H5("❌ Query Error", className="text-danger"),
+            html.H5("Query Error", className="text-danger"),
             html.P(f"Error: {str(e)}", className="text-danger"),
             html.Details([
                 html.Summary("Show full error", className="text-muted small"),
