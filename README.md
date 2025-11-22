@@ -32,6 +32,7 @@ Clone the project, and cd into the cloned folder, then...
 ```bash
 docker-compose down
 ```
+Or simply crash the program with Ctrl-C.
 
 ### Troubleshooting
 
@@ -42,18 +43,29 @@ docker-compose up --build
 docker-compose exec app python app/load_data.py
 ```
 
+Another possible issue is of timing. Our database is quite large, and it may take a while to load.
+
+If the app loads before the database is populated, it will appear as if there is no data. If this happens:
+```bash
+docker-compose restart app
+```
+
 ## Project Structure MUST look like this
 ```
-├── docker-compose.yml    # docker compose file
-├── Dockerfile            # docker container
-├── requirements.txt      # dependencies
-├── db/
-│   └── schema.sql       # Database schema (auto-loaded)
-├── app/
-│   ├── app.py           # Dash dashboard
-│   └── load_data.py     # ETL script
-└── datasets/            # CSV files (required!)
-    └── (all project datasets)
+|-- docker-compose.yml     # docker compose file |--
+|-- Dockerfile             # docker container
+|-- requirements.txt       # dependencies
+|-- entrypoint.sh          # entry script used by docker
+|-- diagrams/              # project diagrams
+|   |-- (all diagrams are here)
+|-- db/                    # data-base relevant items
+|   |-- schema.sql         # Database schema (auto-loaded)
+|-- app/                   # All python apps go here
+|   |-- app.py             # Dash dashboard
+|   |-- load_data.py       # ETL script
+|   |-- sanitychecker.py   # debugging tool - not relevant to app
+|-- datasets/              # CSV files (required!)
+    |-- (all project datasets)
 ```
 
 # Tech Stack

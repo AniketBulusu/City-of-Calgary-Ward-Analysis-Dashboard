@@ -1,11 +1,13 @@
 #!/bin/bash
 set -e
 
+## Used to make sure the app doesn't load before the database is ready
+
 echo ""
 echo "STARTUP SCRIPT"
 echo ""
 
-# Wait for database to be ready
+# Wait for database to be ready - it runs a query to see if we have data
 echo "Waiting for database to be ready..."
 python3 << PYTHON
 import time
@@ -31,7 +33,7 @@ for i in range(max_retries):
             exit(1)
 PYTHON
 
-# Check if data is already loaded
+# Check if data is already loaded - if the data is returned we are good
 echo ""
 echo "Checking if data is already loaded..."
 WARD_COUNT=$(python3 << PYTHON
@@ -51,6 +53,8 @@ except:
 PYTHON
 )
 
+## in this case, we have to run the loader
+
 if [ "$WARD_COUNT" -eq 0 ]; then
     echo "No data found. Loading data..."
     python app/loader.py
@@ -66,7 +70,7 @@ else
 fi
 
 echo ""
-echo "Starting Dash application..."
+echo "Starting app..."
 echo ""
 
 # Start the application

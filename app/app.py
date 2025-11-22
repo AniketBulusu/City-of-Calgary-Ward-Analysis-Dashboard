@@ -1,18 +1,22 @@
+# OS stuff
 from pathlib import Path
 import os
 
+# DATA stuff
 import pandas as pd
 from sqlalchemy import create_engine, text
 
+# UI stuff
 from dash import Dash, dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
 
+# Set base pash for project
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "datasets"
 
-# get's env 
+# used by the dash app
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+psycopg2://appuser:app_password@localhost:5432/calgary_ward_db",
@@ -35,10 +39,6 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = "Calgary Ward Analysis Dashboard"  # browser tab title
 
 
-# ==============================
-# REUSABLE COMPONENTS
-# ==============================
-
 def make_metric_card(title: str, value: str, subtitle: str = ""):
     return dbc.Card(
         dbc.CardBody([
@@ -49,10 +49,7 @@ def make_metric_card(title: str, value: str, subtitle: str = ""):
         className="mb-3 shadow-sm",
     )
 
-
-# ==============================
-# LAYOUT
-# ==============================
+# Define app layout
 
 app.layout = dbc.Container(
     [
@@ -81,16 +78,13 @@ app.layout = dbc.Container(
         # Main tabs
         dbc.Tabs(
             [
-                # ========================
-                # TAB 1: WARD EXPLORER
-                # ========================
                 dbc.Tab(
                     label="Ward Explorer",
                     tab_id="tab-ward-explorer",
                     children=[
                         dbc.Row(
                             [
-                                # Map
+                                ############################################# MAP GOES HERE
                                 dbc.Col(
                                     [
                                         html.H4(
@@ -101,17 +95,18 @@ app.layout = dbc.Container(
                                             "Click on a ward to see key metrics and summary information.",
                                             className="text-muted",
                                         ),
-                                        dcc.Graph(
+                                        dcc.Graph(  #### MAP PLACE HOLDER
                                             id="ward-map",
                                             style={"height": "600px"},
                                             config={"displayModeBar": True},
-                                            figure=go.Figure(),  # placeholder; you'll fill this
+                                            figure=go.Figure(),  
                                         ),
                                     ],
                                     width=8,
                                 ),
 
-                                # Ward details panel
+                                ###################################################### WARD SUMMARY GOES HERE
+                                # Ward details panel extends from the map on the left
                                 dbc.Col(
                                     [
                                         html.H4(
@@ -132,33 +127,11 @@ app.layout = dbc.Container(
                                 ),
                             ]
                         ),
-                        # Optional: small charts for selected ward
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        html.Hr(),
-                                        html.H5("Ward Breakdown (Optional)", className="mt-2 mb-2"),
-                                        html.Div(
-                                            id="ward-breakdown-charts",
-                                            children=[
-                                                html.P(
-                                                    "Mini-charts (e.g., education, transport modes) for the selected ward can go here.",
-                                                    className="text-muted",
-                                                )
-                                            ],
-                                        ),
-                                    ]
-                                )
-                            ]
-                        ),
-                        dcc.Store(id="selected-ward-store"),  # hold current ward selection
+                        dcc.Store(id="selected-ward-store"),  
                     ],
                 ),
 
-                # ========================
-                # TAB 2: VISUALIZATIONS
-                # ========================
+                ####################################################### VISUALIZATIONS GO HERE
                 dbc.Tab(
                     label="Visualizations",
                     tab_id="tab-visualizations",
@@ -172,7 +145,7 @@ app.layout = dbc.Container(
                                     ),
                                     html.P(
                                         "Explore relationships between ward characteristics and political outcomes. "
-                                        "Use curated stories for a guided tour, or switch to custom analysis to build your own comparisons.",
+                                        "Curated set provides a baked in overview - switch to custom analysis to build your own comparisons.",
                                         className="text-muted",
                                     ),
                                 ],
@@ -182,40 +155,39 @@ app.layout = dbc.Container(
 
                         dbc.Tabs(
                             [
-                                # ---- Curated Stories ----
                                 dbc.Tab(
-                                    label="Curated Stories",
-                                    tab_id="tab-stories",
+                                    label="Curated Set",
+                                    tab_id="tab-set",
                                     children=[
                                         dbc.Row(
                                             [
                                                 dbc.Col(
                                                     [
                                                         html.Label(
-                                                            "Select a story:",
+                                                            "Select a category:",
                                                             className="fw-bold mt-3",
                                                         ),
                                                         dcc.Dropdown(
-                                                            id="story-select",
+                                                            id="curated-select",
                                                             options=[
                                                                 {
                                                                     "label": "Turnout vs Population",
-                                                                    "value": "story_population_turnout",
+                                                                    "value": "curated_population_turnout",
                                                                 },
                                                                 {
                                                                     "label": "Economy & Turnout (Labour Force, Income)",
-                                                                    "value": "story_economy_turnout",
+                                                                    "value": "curated_economy_turnout",
                                                                 },
                                                                 {
                                                                     "label": "Services, Safety & Turnout",
-                                                                    "value": "story_services_safety",
+                                                                    "value": "curated_services_safety",
                                                                 },
                                                                 {
                                                                     "label": "Mayoral Candidates Across Wards",
-                                                                    "value": "story_candidates",
+                                                                    "value": "curated_candidates",
                                                                 },
                                                             ],
-                                                            value="story_population_turnout",
+                                                            value="curated_population_turnout",
                                                             clearable=False,
                                                             className="mb-3",
                                                         ),
@@ -225,7 +197,7 @@ app.layout = dbc.Container(
                                                 dbc.Col(
                                                     [
                                                         html.Div(
-                                                            id="story-description",
+                                                            id="curated-description",
                                                             className="mt-3 mb-2 text-muted",
                                                         ),
                                                     ],
@@ -238,7 +210,7 @@ app.layout = dbc.Container(
                                                 dbc.Col(
                                                     [
                                                         dcc.Graph(
-                                                            id="story-viz-graph",
+                                                            id="curated-viz-graph",
                                                             style={"height": "600px"},
                                                         )
                                                     ],
@@ -249,7 +221,6 @@ app.layout = dbc.Container(
                                     ],
                                 ),
 
-                                # ---- Custom Analysis ----
                                 dbc.Tab(
                                     label="Custom Analysis",
                                     tab_id="tab-custom",
@@ -335,9 +306,6 @@ app.layout = dbc.Container(
                     ],
                 ),
 
-                # ========================
-                # TAB 3: DATA VIEW
-                # ========================
                 dbc.Tab(
                     label="Data View",
                     tab_id="tab-data-view",
@@ -357,25 +325,25 @@ app.layout = dbc.Container(
                                         dcc.Dropdown(
                                             id="dataset-dropdown",
                                             options=[
-                                                {'label': '📋 Ward List', 'value': 'ward_summary'},
-                                                {'label': '👥 Population', 'value': 'ward_population'},
-                                                {'label': '🚔 Crime', 'value': 'ward_crime'},
-                                                {'label': '⚠️ Disorder', 'value': 'ward_disorder'},
-                                                {'label': '👶 Age & Gender', 'value': 'ward_age_gender'},
-                                                {'label': '🎓 Education', 'value': 'ward_education'},
-                                                {'label': '💰 Income', 'value': 'ward_income'},
-                                                {'label': '💼 Labour Force', 'value': 'ward_labour_force'},
-                                                {'label': '🚗 Transport Modes', 'value': 'ward_transport_mode'},
-                                                {'label': '🚌 Transit Stops', 'value': 'ward_transit_stops'},
-                                                {'label': '⚽ Recreation', 'value': 'ward_recreation'},
-                                                {'label': '🏥 Community Services', 'value': 'community_services'},
-                                                {'label': '🗳️ Election Info', 'value': 'election'},
-                                                {'label': '🏆 Races', 'value': 'race'},
-                                                {'label': '👤 Candidates', 'value': 'candidate'},
-                                                {'label': '📍 Voting Stations', 'value': 'voting_station'},
-                                                {'label': '📊 Election Results (Raw)', 'value': 'election_result'},
-                                                {'label': '📈 Voter Turnout (Calculated)', 'value': 'turnout'},
-                                                {'label': '🥇 Election Winners', 'value': 'winners'},
+                                                {'label': 'Ward List', 'value': 'ward_summary'},
+                                                {'label': 'Population', 'value': 'ward_population'},
+                                                {'label': 'Crime', 'value': 'ward_crime'},
+                                                {'label': 'Disorder', 'value': 'ward_disorder'},
+                                                {'label': 'Age & Gender', 'value': 'ward_age_gender'},
+                                                {'label': 'Education', 'value': 'ward_education'},
+                                                {'label': 'Income', 'value': 'ward_income'},
+                                                {'label': 'Labour Force', 'value': 'ward_labour_force'},
+                                                {'label': 'Transport Modes', 'value': 'ward_transport_mode'},
+                                                {'label': 'Transit Stops', 'value': 'ward_transit_stops'},
+                                                {'label': ' Recreation', 'value': 'ward_recreation'},
+                                                {'label': 'Community Services', 'value': 'community_services'},
+                                                {'label': 'Election Info', 'value': 'election'},
+                                                {'label': 'Races', 'value': 'race'},
+                                                {'label': 'Candidates', 'value': 'candidate'},
+                                                {'label': 'Voting Stations', 'value': 'voting_station'},
+                                                {'label': 'Election Results (Raw)', 'value': 'election_result'},
+                                                {'label': 'Voter Turnout (Calculated)', 'value': 'turnout'},
+                                                {'label': 'Election Winners', 'value': 'winners'},
                                             ],
                                             value='ward_summary',
                                             clearable=False,
@@ -396,9 +364,6 @@ app.layout = dbc.Container(
                     ],
                 ),
 
-                # ========================
-                # TAB 4: ABOUT
-                # ========================
                 dbc.Tab(
                     label="About",
                     tab_id="tab-about",
@@ -425,14 +390,13 @@ app.layout = dbc.Container(
                                                         "The backend uses a normalized PostgreSQL schema with tables "
                                                         "for wards, demographics, services, and detailed election "
                                                         "results by voting station. Visualizations are generated "
-                                                        "on-demand using SQL queries, pandas, and Plotly.",
+                                                        "on-demand using SQL queries, pandas, Plotly, and Streamlit.",
                                                         className="mb-2",
                                                     ),
                                                     html.P(
                                                         "Use the Ward Explorer to interact with individual wards, "
-                                                        "the Visualizations tab for both curated stories and custom "
-                                                        "analysis, and the Data View tab to inspect the underlying "
-                                                        "datasets.",
+                                                        "the Visualizations tab for both curated and custom analysis,"
+                                                        "and the Data View tab to inspect the underlying datasets.",
                                                         className="mb-0",
                                                     ),
                                                 ]
@@ -456,10 +420,7 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
-
-# ==============================
-# CALLBACKS (SKELETONS)
-# ==============================
+####################### CALL BACKS
 
 # ---- Ward Explorer: map + details ----
 
@@ -511,35 +472,35 @@ def update_ward_details(selected_ward):
     return detail_children, breakdown_children
 
 
-# ---- Curated Stories ----
+# ---- Curated Sets ----
 
 @app.callback(
-    Output("story-viz-graph", "figure"),
-    Output("story-description", "children"),
-    Input("story-select", "value"),
+    Output("curated-viz-graph", "figure"),
+    Output("curated-description", "children"),
+    Input("curated-select", "value"),
 )
-def update_story_visualization(story_id):
+def update_curated_visualization(curated_id):
     fig = go.Figure()
 
-    if story_id == "story_population_turnout":
-        fig.update_layout(title="Story: Turnout vs Population (placeholder)", xaxis_title="Ward", yaxis_title="Value")
-        desc = "This story will compare ward population to total voter turnout."
+    if curated_id == "curated_population_turnout":
+        fig.update_layout(title="Turnout vs Population (placeholder)", xaxis_title="Ward", yaxis_title="Value")
+        desc = "This visualization will compare ward population to total voter turnout."
 
-    elif story_id == "story_economy_turnout":
-        fig.update_layout(title="Story: Economy & Turnout (placeholder)", xaxis_title="Economic Measures", yaxis_title="Turnout")
-        desc = "This story will connect labour force participation and household income to voter turnout."
+    elif curated_id == "curated_economy_turnout":
+        fig.update_layout(title="Economy & Turnout (placeholder)", xaxis_title="Economic Measures", yaxis_title="Turnout")
+        desc = "This visualization will connect labour force participation and household income to voter turnout."
 
-    elif story_id == "story_services_safety":
-        fig.update_layout(title="Story: Services, Safety & Turnout (placeholder)", xaxis_title="Service / Safety Index", yaxis_title="Turnout")
-        desc = "This story will examine whether access to community services and crime levels are associated with turnout."
+    elif curated_id == "curated_services_safety":
+        fig.update_layout(title="Services, Safety & Turnout (placeholder)", xaxis_title="Service / Safety Index", yaxis_title="Turnout")
+        desc = "This visualization will examine whether access to community services and crime levels are associated with turnout."
 
-    elif story_id == "story_candidates":
-        fig.update_layout(title="Story: Mayoral Candidates Across Wards (placeholder)", xaxis_title="Ward", yaxis_title="Votes")
-        desc = "This story will highlight where different mayoral candidates performed best."
+    elif curated_id == "curated_candidates":
+        fig.update_layout(title="Mayoral Candidates Across Wards (placeholder)", xaxis_title="Ward", yaxis_title="Votes")
+        desc = "This visualization will highlight where different mayoral candidates performed best."
 
     else:
-        fig.update_layout(title="Select a story")
-        desc = "Select a story from the dropdown."
+        fig.update_layout(title="Select a curated set")
+        desc = "Select a curated set from the dropdown."
 
     return fig, desc
 
@@ -570,8 +531,7 @@ def update_custom_visualization(n_clicks, characteristic, politics):
     msg = f"Showing placeholder visualization for '{characteristic}' against '{politics}'."
     return fig, msg
 
-
-# ---- Data View ---- FIXED VERSION
+### DATA VIEW
 
 @app.callback(
     Output("sql-query-display", "children"),
@@ -579,11 +539,6 @@ def update_custom_visualization(n_clicks, characteristic, politics):
     Input("dataset-dropdown", "value"),
 )
 def update_dataset_view(selected_dataset):
-    """
-    Show SQL query and result table for selected dataset.
-    Simple approach: just show table contents.
-    """
-    # Map dataset values to table queries
     table_queries = {
         'ward_summary': {
             'sql': 'SELECT * FROM ward ORDER BY ward_number',
@@ -794,11 +749,6 @@ def update_dataset_view(selected_dataset):
         ])
         
         return query_display, error_display
-
-
-# ==============================
-# MAIN
-# ==============================
 
 if __name__ == "__main__":
     print("Dashboard started on http://0.0.0.0:8050")

@@ -1,3 +1,9 @@
+# Was experiencing lots of issues trying to figure out why data wasn't being loaded into app.
+# Finally diagnosed as the app loading much faster than database is populated.
+# This is a debugging tool written just to make sure the database is ready.
+# All it does is run random checks to make sure data exists in tables.
+# checks table names, counts, rows, queries, and returns the sumary at the end.
+
 import os
 import pandas as pd
 from sqlalchemy import create_engine, text
@@ -63,25 +69,25 @@ def main():
             exists = check_table_exists(conn, tbl)
             print(f"[{'OK' if exists else 'ERR'}] Table exists: {tbl}")
 
-        print("\n=== Row counts for key tables ===")
+        print("\n=== Row counts for tables ===")
         row_issues = []
         for tbl in EXPECTED_TABLES:
             try:
                 rows = count_rows(conn, tbl)
-                print(f"    [ROWS] {tbl}: {rows}")
+                print(f"{tbl}: {rows}")
 
                 if rows > 0:
                     sample = sample_rows(conn, tbl)
                     if sample is not None:
-                        print(f"    [SAMPLE] {tbl}:\n{sample}")
+                        print(f"{tbl}:\n{sample}")
                 else:
-                    print(f"    [SAMPLE] {tbl}: (no rows)")
+                    print(f"{tbl}: (no rows)")
                     row_issues.append(f"Table '{tbl}' has 0 rows")
             except Exception as e:
-                print(f"    [ERROR] Could not read table {tbl}: {e}")
-                row_issues.append(f"Table '{tbl}' missing or unreadable")
+                print(f"Could not read table {tbl}: {e}")
+                row_issues.append(f"Table '{tbl}' missing")
 
-        print("\n=== Semantic checks ===")
+        print("\n=== Others ===")
 
         # Ward numbers 1–14 present?
         try:
@@ -89,11 +95,11 @@ def main():
             ward_nums = ward_df["ward_number"].tolist()
             missing = [w for w in range(1, 15) if w not in ward_nums]
             if missing:
-                print(f"[WARN] Missing ward numbers: {missing}")
+                print(f"Missing ward numbers: {missing}")
             else:
-                print("[OK] All wards 1–14 present")
+                print("All wards 1–14 present")
         except Exception as e:
-            print(f"[WARN] Could not check ward numbers: {e}")
+            print(f"Could not check ward numbers: {e}")
 
         # Turnout per ward
         turnout_query = text("""
@@ -110,17 +116,16 @@ def main():
         try:
             turnout = pd.read_sql(turnout_query, conn)
             if turnout.empty:
-                print("[WARN] Turnout query returned no rows")
+                print("Turnout query returned no rows")
             else:
-                print("[OK] Turnout sample:\n", turnout.head())
+                print("Turnout sample:\n", turnout.head())
         except Exception as e:
-            print(f"[WARN] Turnout query failed: {e}")
+            print(f"Turnout query failed: {e}")
 
-        print("\n=== SUMMARY ===")
         if not row_issues:
-            print("[OK] All checks passed.")
+            print("All checks passed.")
         else:
-            print("[WARN] Sanity check detected issues:")
+            print("Sanity check detected issues:")
             for issue in row_issues:
                 print("  - " + issue)
 
