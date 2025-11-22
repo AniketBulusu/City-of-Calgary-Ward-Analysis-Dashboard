@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16
+    container_name: calgary-db
+    environment:
+      POSTGRES_DB: calgary_ward_db
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: app_password
+    ports:
+      - "5432:5432"     
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d calgary_ward_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: calgary-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8050:8050"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://appuser:app_password@db:5432/calgary_ward_db
+    volumes:
+      - ./app:/app/app
+      - ./datasets:/app/datasets
+
+volumes:
+  db_data:
