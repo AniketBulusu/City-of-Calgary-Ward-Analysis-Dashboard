@@ -588,9 +588,9 @@ def update_curated_visualization(curated_id):
                 SELECT 
                     wi.ward_number,
                     SUM(wi.household_count) as total_households,
-                    SUM(CASE WHEN wi.income_group IN ('Under $20,000', '$20,000 to $39,999') 
+                    SUM(CASE WHEN wi.income_group IN ('under_$20000', '$20000_to_$39999') 
                         THEN wi.household_count ELSE 0 END) as low_income,
-                    SUM(CASE WHEN wi.income_group IN ('$200,000 and over') 
+                    SUM(CASE WHEN wi.income_group = '$200000_and_over' 
                         THEN wi.household_count ELSE 0 END) as high_income
                 FROM ward_income wi
                 GROUP BY wi.ward_number
