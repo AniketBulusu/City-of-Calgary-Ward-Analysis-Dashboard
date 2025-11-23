@@ -107,8 +107,12 @@ ALTER TABLE public._ward_disorder OWNER TO sultanalzoghaibi;
 --
 
 CREATE TABLE public._ward_education (
-    "PK" text,
-    "à¥ÇDO97*~§ÈÉ¸8ÀOíc|n¦ÑäEøÿöéºóÀBÉ" text
+    "Ward" integer,
+    "Category" integer,
+    "Number" integer,
+    "Percent" integer
+
+
 );
 
 
@@ -182,8 +186,8 @@ ALTER TABLE public._ward_labour_force OWNER TO sultanalzoghaibi;
 --
 
 CREATE TABLE public._ward_population (
-    "PK" text,
-    "à¥ÇDO97*~§ÈÉ¸8ÀOíc|n¦ÑäEøÿöéºóÀBÉ" text
+    "Ward" integer,
+    "Population" integer
 );
 
 
@@ -644,53 +648,63 @@ COPY public._ward_disorder ("Ward ", "Total Disorder", "Population", "Rate  Per 
 -- Data for Name: _ward_education; Type: TABLE DATA; Schema: public; Owner: sultanalzoghaibi
 --
 
-COPY public._ward_education ("PK", "à¥ÇDO97*~§ÈÉ¸8ÀOíc|n¦ÑäEøÿöéºóÀBÉ") FROM stdin;
-?9LìÒÈsbgÙ®|Èl!õùUSh9i°br:"y_dlÀóD¿ý|-NÈR"4ø2ÏGÇ% õZ´4ñËyÄ7\tÃ«ÈðÉ¨Þ	NaN
-&$$¨t"hº*jú"M*b0³&UÕÿ¾3¤m¾tíØÇÏÝ=wÿØz`RqQ9±*¯îB|y1µ)M«¢b!~d	NaN
-ÿ8ùþíx#äý­÷\b	NaN
-(FeÌî*!émnoIm%¸Ûí¦­JJ¡ÄJ´Ý>ð86!oB°=ÁÇ<[²nr¸c%d5Øa	NaN
-y	ËôïfäÉÇÕß
-XZ1h0á\bq x@ÿ¾½?Ñ´¸§¹Û\fýHXÝ#b%\f¥Dêym¬ã+yï\tdïð.ñdÒüÂYoÛ!=_§ÿÀgÒuþ7a\ts°ñ	NaN
-"\\¹ãöå\f	NaN
-ÛÜá¸jwUÅªí0nÅ~"äµ	NaN
-µH½«-¨íÅ+0q\bBîJs[ÃEð)¹ì	NaN
-³çk©¡÷ZÅäØPØ&dÎ"ûÜä¶~Ñk3g!¨æÝpé§ä&³½ø^ÆÏI¨?Êù	NaN
-rüXäßUÑº7	&àªr³-»Ò;½V1s²×`j¯Y¬ÀAÙùvo¢×*Æ¥Y6¬E±No±J.ÍÆ­ÔPÝOîÉwt
-)êá-n@ÉMj{7àÍLt£8­åfó¦Sµö+¼ú¹ÿ9zqðÿâäï-~@ÉYó¤wø&ç	6´ü÷; ä&³Þ
-µ¸ÇÉ/Zo\f	n@ÉMn½Ù
-!­Õé¨·ØÏÞh@°´ÂÜÊÊ!7X¼±©Z©¡·F7#Êé­f1c>çÖ	NaN
-qip´»ª`1Jn.[o6	NaN
-	NaN
-Iù%%ù¹0^FjbJjg¬¤_ãèÛÙèçeg¤¦Ø	NaN
-}ëC)	NaN
-4ÐÐþ6ý=3­õ8Ë¦´%kX¤ÑwÎ|sÎÑ7]¼t/¦ÎN9aIÛ­^¨¸NÆlBYÛ½5®ÃJ&²·Ý%æî¥Ý?ºvDcì}ÂwPÛïË|\fÍ_`sÀ³)Kc$à6'):¿1-×* #¸Nbp{}:%cì\f¥Kwwå¼Oá6\\6iz ]cÃBa'UàKÒÔ9B´íB?v<Ä÷ëPÄ<h»õçw/ÑNnDÅ[Ín þr»Ü`rXS}¦³ÑºSÏó½ ³ö¯	NaN
-µÜyjXWìbÊ±­Öbt¥	P¾-®û"2×Úp]lðv
-*c^^Ü5¸DéBKÏW£Ø	µàªìKðpÌì§\vw¡#[ß!J÷sWbsFØ y¢D N°pä3v±etw\b1âºOÆ)ãl*;Äé"b
-ÉB*®ò²´T±Ù¿ítµºL$¼ZÈ15Âx-m.(¦zÀ÷l$éXÇõ¹LÏ0eN9·Ù\\Oa¼ZÒ¯ÂØÓ¾O±L9´ùÜCéÈ;\f#Ï­IéØOø!(rn0aï3ó	NaN
-÷lM÷mt-·@\\uJEÈ'ÔËËïãNV*ÚoHzL3õý²ûÿ²Û5ú4Ýîø]Ô¼ë;uåoÃý»É	NaN
-Z¹$´2ÐçÕ©g®[EJ	NaN
-z2«·¡ Ñh¾\\K9¥	NaN
-4Ñ&ÎqÛ	NaN
-ê>Ñ¼íNaßñjË/¢38<4{áßFYæ)=Ä£	àJt25À©CIÜvåð×Õ@¥![µð¯%×Yù·¤IÆÓ)\v=íZtv\v
-iõ©2{°´d\vH÷A49vFtÞDPb~£*8!ªY4'Î3×BVÔß©)]ý@QÕPÖè<Bù¢yW"º¦£îÖ1Ðîò1C@7C8É\tögÝ³§j9M49ÓP9kÚÅôýMò«b5XeÒ­¶	NaN
-¼ÐºÖJë P­³Ä³îkL\bµ¢3d¼)ÃR³óVÚ9.\b´H[â¶#¬xÛìNW­ VëJUøêÃþmîxôàxAW©/)E_vÉ¼"÷D¾F+g¶{¿âw¼°æ¥JÓï¼ºW)5ýN½ÔñýzµïW+½níL	«~öÑe
-NaN	\t¶ËÒÔPèÆ ì«bË¨^$gÎÆþûNv^:¶Ñ~NçÓsÏÝsRÒN
-´cÆr­2]1Uê«M¿>Á\f#ë¨ª¨ÐexÏ	¾Éß¿K­Û\vö¸eÌ!P6Ã[ç!¶Ü2Iín/µ6:Ø
-±a´²þ$Ã)+< 	dù? ç¶\tJ-êø\vîö=F²\\Üo6t-jMhºhjbÔcÞû"ä¥ÑV×î
-p®k^²tçdNhyFä×!E\t\tãÚ;óJ¤\t1lÇ½|8Ok­E¥n1¨oÁâYéïªð¼sÊSûí¨	NaN
-Ø ý´o ½I`ú¸Do\fÝGq2:@úyºÖ¦É>÷ãèÊSÁjD	NaN
-ßlýêt¿kí¨§§­¨ð¥\f 'Ê)~ú¿ÕØ]T+\véî«\fÃ=òM8PÈÁðÇ£	NaN
-ØoE]}#Ú¤Oé×;Ãýu09\b´n¹p\\ý0`VÝ¹¡WÀù«×7ç:Q±¶Â=>følboe|úÂwÚõ>Û^©hês°Î=X/XQkxÞ-?ÌWwEÌÂå	\\³$'ËULn«U1ãðö×èxÃõïß«<µ°\ts(öPâãÙáÑf ßÏ(ÐsÇÓðcAqFÁdJgÁlzEÅ«édyÉ{òÊg"$Q4<8|²p\\2ÁÕQ«£Bc/Û¿AJóAþ
-!3¡3	NaN
-ìýíÑ®í8TçGc$NXlxFj×´Å:+A&D-Ù<ôýÖ\bºÈ\v©m;»PúZðp;ðV·ê?B¬QoÍ_¾°#kÈkø²O¬kú5"éâÈõ|UÒ\\³§4g.áª7ÜÜü/2Íÿ	õ6C/Å2£À:®%¯j
-:Eüú*	NaN
-µgS7`\\\t6ð$mh2´s®a[±ÅmäÚÚ(îüÒlqÃÅß\taKî8na3Ñ\t)Ål>MÕ¤ÀPí	¦Å?]FÙ?tÉ¨©JwlüNºc¶}8´¶ûý>ÚO:
-BX2cÓéxä÷å§È¿	NaN
-­£øðqwL\f¬Õ·¼³øú§³9bl¨ø~°àé¶`_²££.·jk5ëÆx%ßêÌ°´qµêiÕ¥\vtxmW¢ømJô&;±ÛÔµOHY?Åü-	NaN
-Ô=o2û!dÝ°úÕó¿0<þãôÃõòzQ~.ù]g3%ßþ²þ\v	NaN
-NaN	NaN
-NaN	NaN
-NaN	NaN
+COPY public._ward_education ("Ward", "Category", "Number", "Percent") FROM stdin;
+1 Total 72145 100
+1 None 6985 10
+1 Diploma 16095 22
+1 Post Secondary 49060 68
+2 Total 75335 100
+2 None 7765 10
+2 Diploma 17350 23
+2 Post Secondary 50220 67
+3 Total 68980 100
+3 None 9675 14
+3 Diploma 18920 27
+3 Post Secondary 40385 59
+4 Total 74415 100
+4 None 9750 13
+4 Diploma 19535 26
+4 Post Secondary 45130 61
+5 Total 81115 100
+5 None 15950 20
+5 Diploma 23500 29
+5 Post Secondary 41660 51
+6 Total 79425 100
+6 None 7770 10
+6 Diploma 16995 21
+6 Post Secondary 54660 69
+7 Total 67315 100
+7 None 5475 8
+7 Diploma 13380 20
+7 Post Secondary 48455 72
+8 Total 84525 100
+8 None 6055 7
+8 Diploma 17060 20
+8 Post Secondary 61400 73
+9 Total 71850 100
+9 None 15635 22
+9 Diploma 22890 32
+9 Post Secondary 33325 46
+10 Total 72800 100
+10 None 17100 23
+10 Diploma 24605 34
+10 Post Secondary 31100 43
+11 Total 87115 100
+11 None 9390 11
+11 Diploma 23715 27
+11 Post Secondary 54010 62
+12 Total 76095 100
+12 None 7780 10
+12 Diploma 19720 26
+12 Post Secondary 48590 64
+13 Total 74705 100
+13 None 7800 10
+13 Diploma 19545 26
+13 Post Secondary 47355 63
+14 Total 70480 100
+14 None 7445 11
+14 Diploma 19830 28
+14 Post Secondary 43205 61
 \.
 
 
@@ -47924,47 +47938,21 @@ COPY public._ward_labour_force ("Ward", "Gender", "Population_15plus", "In_Labou
 -- Data for Name: _ward_population; Type: TABLE DATA; Schema: public; Owner: sultanalzoghaibi
 --
 
-COPY public._ward_population ("PK", "à¥ÇDO97*~§ÈÉ¸8ÀOíc|n¦ÑäEøÿöéºóÀBÉ") FROM stdin;
-?9LìÒÈsbgÙ®|Èl!õùUSh9i°br:"y_dlÀóD¿ý|-NÈR"4ø2ÏGÇ% õZ´4ñËyÄ7\tÃ«ÈðÉ¨Þ	NaN
-ÿ8ùþíx#äý­÷\b	NaN
-(FeÎî*!émnoI¶Î\\ÄÁívÓÁV%O¥Pb¥	NaN
-y	ËôïfäÉÇÕß
-7Ö-}\t\bÏhB2æE\tûÈV`p¦°Nó¿nÁ|åçÍ&­X;ûLsièºk¶(¤+	NaN
-&ì!¿/eå4-®Áiî«ª%¬®1J]¥Dt¶0Öñ¹Âº·I\v²uø¶ñëdñ\v%-³Þ!B2Ûç|Yþ	NaN
-GÒeýWa.s°õPíÛRJzGVûëÜ\bëaõq¹t%óþÄÿO\vû¤nâSsû¥£a.ñëª"£Iúô(	NaN
-}IØø³>"	NaN
-\b¥7fg-õÎZ"d2¥Á¢* @I$T¸£5P¢Tðæc0Xø²@¢y^%.ú=WÚ<ëi8s¸í÷\\±¥>áÜ®ü°Å:éü®ý£3Íþëÿ	JÏÌ+VÈIM+±U2Ð3WR(ÊLÏ±Kò\vÀ¢¦J
-Iù%%ù¹0^FjbJjg¬¤_ãèÛÙèçeg¤¦Ø	NaN
-}ëC)	NaN
-4ÐÐþ6ý=3­õ8Ë¦´%kX¤ÑwÎ|sÎÑ7]¼t/¦ÎN9aIÛ­^¨¸NÆlBYÛ½5®ÃJ&²·Ý%æî¥Ý?ºvDcì}ÂwPÛïË|\fÍ_`sÀ³)Kc$à6'):¿1-×* #¸Nbp{}:%cì\f¥Kwwå¼Oá6\\6iz ]cÃBa'UàKÒÔ9B´íB?v<Ä÷ëPÄ<h»õçw/ÑNnDÅ[Ín þr»Ü`rXS}¦³ÑºSÏó½ ³ö¯	NaN
-µÜyjXWìbÊ±­Öbt¥	P¾-®û"2×Úp]lðv
-*c^^Ü5¸DéBKÏW£Ø	µàªìKðpÌì§\vw¡#[ß!J÷sWbsFØ y¢D N°pä3v±etw\b1âºOÆ)ãl*;Äé"b
-ÉB*®ò²´T±Ù¿ítµºL$¼ZÈ15Âx-m.(¦zÀ÷l$éXÇõ¹LÏ0eN9·Ù\\Oa¼ZÒ¯ÂØÓ¾O±L9´ùÜCéÈ;\f#Ï­IéØOø!(rn0aï3ó	NaN
-÷lM÷mt-·@\\uJEÈ'ÔËËïãNV*ÚoHzL3õý²ûÿ²Û5ú4Ýîø]Ô¼ë;uåoÃý»É	NaN
-Z¹$´2ÐçÕ©g®[EJ	NaN
-z2«·¡ Ñh¾\\K9¥	NaN
-4Ñ&ÎqÛ	NaN
-ê>Ñ¼íNaßñjË/¢38<4{áßFYæ)=Ä£	àJt25À©CIÜvåð×Õ@¥![µð¯%×Yù·¤IÆÓ)\v=íZtv\v
-iõ©2{°´d\vH÷A49vFtÞDPb~£*8!ªY4'Î3×BVÔß©)]ý@QÕPÖè<Bù¢yW"º¦£îÖ1Ðîò1C@7C8É\tögÝ³§j9M49ÓP9kÚÅôýMò«b5XeÒ­¶	NaN
-¼ÐºÖJë P­³Ä³îkL\bµ¢3d¼)ÃR³óVÚ9.\b´H[â¶#¬xÛìNW­ VëJUøêÃþmîxôàxAW©/)E_vÉ¼"÷D¾F+g¶{¿âw¼°æ¥JÓï¼ºW)5ýN½ÔñýzµïW+½níL	«~öÑe
-NaN	\t¶ËÒÔPèÆ ì«bË¨^$gÎÆþûNv^:¶Ñ~NçÓsÏÝsRÒN
-´cÆr­2]1Uê«M¿>Á\f#ë¨ª¨ÐexÏ	¾Éß¿K­Û\vö¸eÌ!P6Ã[ç!¶Ü2Iín/µ6:Ø
-±a´²þ$Ã)+< 	dù? ç¶\tJ-êø\vîö=F²\\Üo6t-jMhºhjbÔcÞû"ä¥ÑV×î
-p®k^²tçdNhyFä×!E\t\tãÚ;óJ¤\t1lÇ½|8Ok­E¥n1¨oÁâYéïªð¼sÊSûí¨	NaN
-Ø ý´o ½I`ú¸Do\fÝGq2:@úyºÖ¦É>÷ãèÊSÁjD	NaN
-ßlýêt¿kí¨§§­¨ð¥\f 'Ê)~ú¿ÕØ]T+\véî«\fÃ=òM8PÈÁðÇ£	NaN
-ØoE]}#Ú¤Oé×;Ãýu09\b´n¹p\\ý0`VÝ¹¡WÀù«×7ç:Q±¶Â=>følboe|úÂwÚõ>Û^©hês°Î=X/XQkxÞ-?ÌWwEÌÂå	\\³$'ËULn«U1ãðö×èxÃõïß«<µ°\ts(öPâãÙáÑf ßÏ(ÐsÇÓðcAqFÁdJgÁlzEÅ«édyÉ{òÊg"$Q4<8|²p\\2ÁÕQ«£Bc/Û¿AJóAþ
-Â0F÷w\b³·©.D$\vÁèB;¶f3SnoDÄåû<sxÆIÝ±pHdaÝ´ ºÔ	\\Î§Õ§ÞOÐÂ\vn¹0Ì¢êØÂ(÷Zs7bôÜ¤TÍ5è¥b4ç¾çQâ¤7m»ÕÑÕ¥ÄÂÔLá6ãñÇÎppFÜÃÞhqFø»åçÉK-þ]{Ü
-@Zz¡bÞ À:®%¯j	NaN
-:EËüú*	NaN
-µgS7`\\\t6ð$mh2´w®a[±ÅmäÚÛÚ(îüÒìpÃÅß\tcKî8îa3Ñ\t)Ål>MÕ¤ÀPí	¦Å?]FÙ?ôÉ¤©JwlüNºS¶C8¶¶mÛFí¬×ðþ¿­6ýSÃRw³òT
-&\fpW|ÃU°á[Hñd³`Å­[ûYoKwÇ¡w»zLñïÌózý	NaN
-2ðBlÐ?'¯³ûbòÐ$$ó$½atÁbòÞ]}q¾6ÔIà_btQÂhÂ(Ï¼÷¾üù7	NaN
-­£øðqwL\f¬Õ·¼³øú§³9bl¨ø~°àé¶`_²££.·jk5ëÆx%ßêÌ°´qµêiÕ¥\vtxmW¢ømJô&;±ÛÔµOHY?Åü-	NaN
-Ô=o2û!dÝ°úÕó¿0<þãôÃõòzQ~.ù]g3%ßþ²þ\v	NaN
-NaN	NaN
-NaN	NaN
-NaN	NaN
+COPY public._ward_population ("Ward", "Population") FROM stdin;
+1	87780
+2 94935
+3 85675
+4 88825
+5 106220
+6 98175
+7 77660
+8 95800
+9 85410
+10 89485
+11 102435
+12 101455
+13 91535
+14 86450
 \.
 
 
@@ -48125,4 +48113,3 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
-
