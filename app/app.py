@@ -11,6 +11,7 @@ from dash import Dash, dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
+from map_component import ward_map_component  # ← Import your custom map
 
 # Set base pash for project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,51 +83,29 @@ app.layout = dbc.Container(
                     label="Ward Explorer",
                     tab_id="tab-ward-explorer",
                     children=[
-                        dbc.Row(
-                            [
-                                ############################################# MAP GOES HERE
-                                dbc.Col(
-                                    [
-                                        html.H4(
-                                            "Calgary Ward Map",
-                                            className="mt-3 mb-2",
-                                        ),
-                                        html.P(
-                                            "Click on a ward to see key metrics and summary information.",
-                                            className="text-muted",
-                                        ),
-                                        dcc.Graph(  #### MAP PLACE HOLDER
-                                            id="ward-map",
-                                            style={"height": "600px"},
-                                            config={"displayModeBar": True},
-                                            figure=go.Figure(),  
-                                        ),
-                                    ],
-                                    width=8,
+                        dbc.Row([
+                            dbc.Col([
+                                html.H4("Calgary Ward Map", className="mt-3 mb-2"),
+                                html.P(
+                                    "Click on a ward to see key metrics and summary information.",
+                                    className="text-muted",
                                 ),
+                                ward_map_component(),  # embedded Folium map
+                            ], width=8),
 
-                                ###################################################### WARD SUMMARY GOES HERE
-                                # Ward details panel extends from the map on the left
-                                dbc.Col(
-                                    [
-                                        html.H4(
-                                            "Ward Summary",
-                                            className="mt-3 mb-2",
-                                        ),
-                                        html.Div(
-                                            id="ward-detail-panel",
-                                            children=[
-                                                html.P(
-                                                    "Select a ward on the map to view details.",
-                                                    className="text-muted",
-                                                )
-                                            ],
-                                        ),
+                            dbc.Col([
+                                html.H4("Ward Summary", className="mt-3 mb-2"),
+                                html.Div(
+                                    id="ward-detail-panel",
+                                    children=[
+                                        html.P(
+                                            "Select a ward on the map to view details.",
+                                            className="text-muted",
+                                        )
                                     ],
-                                    width=4,
                                 ),
-                            ]
-                        ),
+                            ], width=4),
+                        ]),
                         dcc.Store(id="selected-ward-store"),  
                     ],
                 ),

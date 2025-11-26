@@ -231,10 +231,42 @@ def load_community_services(engine):
     services_df.to_sql('community_services', engine, if_exists='append', index=False)
     print("Loaded community services.")
 
+def load_ward_boundaries(engine):
+    print("Loading ward boundaries (CSV with WKT)...")
+    import geopandas as gpd
+    import pandas as pd
+    from shapely import wkt
+
+    csv_path = DATA_DIR / "Ward_Boundaries_20251117.csv"
+    if not csv_path.exists():
+        print("⚠️ CSV file not found:", csv_path)
+        return
+
+    # Read CSV instead of GeoJSON
+    df = pd.read_csv(csv_path)
+    df.columns = df.columns.str.strip().str.upper()
+
+    # Convert the WKT string to geometry
+    df["geometry"] = df["MULTIPOLYGON"].apply(wkt.loads)
+
+    # Convert to GeoDataFrame
+    gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
+
+    # Save minimal columns to DB (as WKT)
+    gdf["MULTIPOLYGON_WKT"] = gdf["geometry"].apply(lambda g: g.wkt)
+    gdf[["WARD_NUM", "MULTIPOLYGON_WKT"]].to_sql(
+        "ward_boundaries_20251117", engine, if_exists="replace", index=False
+    )
+
+    print("✅ Loaded ward boundaries (CSV).")
+
+
 def load_election_data(engine):
     print('Loading election data...')
     reset_election_tables(engine)
     df = load_csv("_Ward_Election_Results.csv")
+
+
 
 ################################################## DATA CLEANING REQUIRED TO AVOID 0 
 
@@ -387,6 +419,9 @@ def run_script():
         load_ward_recreation(engine)
         load_community_services(engine)
         load_election_data(engine)
+
+        load_ward_boundaries(engine)
+
         print("Success.")
     except Exception as e:
         print(f"Failed to load data: {e}.")
