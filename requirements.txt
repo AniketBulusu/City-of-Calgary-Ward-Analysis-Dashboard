@@ -1,5 +1,9 @@
 ## PROJECT REQUIREMENTS
-
+geopandas
+shapely
+folium
+psycopg2-binary
+sqlalchemy
 dash
 dash-bootstrap-components
 pandas
