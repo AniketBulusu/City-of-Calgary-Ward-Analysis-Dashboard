@@ -85,7 +85,7 @@ rows = cursor.fetchall()
 columns = [desc[0] for desc in cursor.description]
 df = pd.DataFrame(rows, columns=columns)
 
-# ✅ Clean and convert population to integers as l think Population was stored as a string originally
+# Clean and convert population to integers as l think Population was stored as a string originally
 df["Population"] = df["Population"].str.replace(",", "").astype(int)
 
 # Sam and Sultan, so l found that our column name "Ward " has a trailing space which might cause issues later on. So yeah, just keep that in consideration. 
