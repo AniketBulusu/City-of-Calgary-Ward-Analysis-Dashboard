@@ -32,7 +32,7 @@ Clone the project, and cd into the cloned folder, then...
 ```bash
 docker-compose down
 ```
-Or simply crash the program with Ctrl-C.
+Or simply crash the program with Ctrl-C from the terminal.
 
 ### Troubleshooting
 
@@ -52,7 +52,7 @@ docker-compose restart app
 
 ## Project Structure MUST look like this
 ```
-|-- docker-compose.yml     # docker compose file |--
+|-- docker-compose.yml     # docker compose file 
 |-- Dockerfile             # docker container
 |-- requirements.txt       # dependencies
 |-- entrypoint.sh          # entry script used by docker
@@ -62,10 +62,14 @@ docker-compose restart app
 |   |-- schema.sql         # Database schema (auto-loaded)
 |-- app/                   # All python apps go here
 |   |-- app.py             # Dash dashboard
-|   |-- load_data.py       # ETL script
-|   |-- sanitychecker.py   # debugging tool - not relevant to app
+|   |-- loader.py          # Loader script puts data into the database
+|   |-- sanitycheck.py     # debugging tool - not relevant to app
+|   |-- map_component.py   # used for the map window
 |-- datasets/              # CSV files (required!)
-    |-- (all project datasets)
+|   |-- (all project datasets)
+|-- python/
+|   |-- csvToPgadmin.py    # used by pgAdmin as a GUI approach to databases
+|   |-- MapDisplay.py      # used by the map system on the front page   
 ```
 
 # Tech Stack
