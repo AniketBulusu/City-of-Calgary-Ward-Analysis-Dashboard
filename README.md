@@ -87,6 +87,7 @@ docker-compose restart app
 - **Dash** - Python framework for building analytical web applications
 - **Plotl** - Interactive graphing library
 - **Dash Bootstrap Components** - Bootstrap components for Dash
+- **Folium** - Used for mapping
 
 ### **Data Processing**
 - **Pandas** - Data manipulation and analysis
