@@ -87,26 +87,12 @@ app.layout = dbc.Container(
                             dbc.Col([
                                 html.H4("Calgary Ward Map", className="mt-3 mb-2"),
                                 html.P(
-                                    "Click on a ward to see key metrics and summary information.",
+                                    "Hover over a ward to see councillor, population, turnout, crime, disorder, and community services data.",
                                     className="text-muted",
                                 ),
-                                ward_map_component(),  # embedded Folium map
-                            ], width=8),
-
-                            dbc.Col([
-                                html.H4("Ward Summary", className="mt-3 mb-2"),
-                                html.Div(
-                                    id="ward-detail-panel",
-                                    children=[
-                                        html.P(
-                                            "Select a ward on the map to view details.",
-                                            className="text-muted",
-                                        )
-                                    ],
-                                ),
-                            ], width=4),
-                        ]),
-                        dcc.Store(id="selected-ward-store"),  
+                                ward_map_component(),
+                            ], width=12),
+                        ])
                     ],
                 ),
 
@@ -378,7 +364,7 @@ app.layout = dbc.Container(
                                                         "The backend uses a normalized PostgreSQL schema with tables "
                                                         "for wards, demographics, services, and detailed election "
                                                         "results by voting station. Visualizations are generated "
-                                                        "on-demand using SQL queries, pandas, Plotly, and Streamlit.",
+                                                        "on-demand using SQL queries, pandas, Plotly, and Dash.",
                                                         className="mb-2",
                                                     ),
                                                     html.P(
@@ -409,109 +395,6 @@ app.layout = dbc.Container(
 )
 
 ####################### CALL BACKS
-
-# ---- Ward Explorer: map + details ----
-
-@app.callback(
-    Output("selected-ward-store", "data"),
-    Input("ward-map", "clickData"),
-    prevent_initial_call=True,
-)
-def store_selected_ward(click_data):
-    if not click_data:
-        return None
-    point = click_data["points"][0]
-    ward_number = point.get("customdata")
-    return {"ward_number": ward_number}
-
-
-@app.callback(
-    Output("ward-detail-panel", "children"),
-    Input("selected-ward-store", "data"),
-)
-def update_ward_details(selected_ward):
-    if not selected_ward or selected_ward.get("ward_number") is None:
-        return html.P("Select a ward on the map to view details.", className="text-muted")
-
-    ward_number = selected_ward["ward_number"]
-    
-    # Query ward details
-    query = '''
-        SELECT 
-            w.ward_number,
-            w.ward_name,
-            wp.total as population,
-            wc.rate_per_1000 as crime_rate,
-            wd.rate_per_1000 as disorder_rate
-        FROM ward w
-        LEFT JOIN ward_population wp ON w.ward_number = wp.ward_number
-        LEFT JOIN ward_crime wc ON w.ward_number = wc.ward_number
-        LEFT JOIN ward_disorder wd ON w.ward_number = wd.ward_number
-        WHERE w.ward_number = :ward_num
-    '''
-    
-    try:
-        df = query_db(query, params={'ward_num': ward_number})
-        
-        if df.empty:
-            return html.P(f"No data available for Ward {ward_number}", className="text-warning")
-        
-        row = df.iloc[0]
-        population = f"{row['population']:,}" if pd.notna(row['population']) else "N/A"
-        crime_rate = f"{row['crime_rate']:.1f}" if pd.notna(row['crime_rate']) else "N/A"
-        disorder_rate = f"{row['disorder_rate']:.1f}" if pd.notna(row['disorder_rate']) else "N/A"
-        
-        # Get turnout and winner
-        turnout_query = '''
-            SELECT
-                ROUND(100.0 * SUM(er.votes)::numeric / wp.total, 2) as turnout_rate
-            FROM election_result er
-            JOIN voting_station vs ON er.station_code = vs.station_code
-            JOIN ward_population wp ON vs.ward_number = wp.ward_number
-            JOIN race r ON er.race_id = r.race_id
-            WHERE vs.ward_number = :ward_num AND r.type = 'MAYOR'
-            GROUP BY wp.total
-        '''
-        
-        winner_query = '''
-            WITH ward_votes AS (
-                SELECT
-                    c.name,
-                    SUM(er.votes) as total_votes
-                FROM election_result er
-                JOIN candidate c ON er.candidate_id = c.candidate_id
-                JOIN race r ON er.race_id = r.race_id
-                JOIN voting_station vs ON er.station_code = vs.station_code
-                WHERE vs.ward_number = :ward_num AND r.type = 'MAYOR'
-                GROUP BY c.name
-                ORDER BY total_votes DESC
-                LIMIT 1
-            )
-            SELECT name as winner FROM ward_votes
-        '''
-        
-        turnout_df = query_db(turnout_query, params={'ward_num': ward_number})
-        winner_df = query_db(winner_query, params={'ward_num': ward_number})
-        
-        turnout_rate = f"{turnout_df.iloc[0]['turnout_rate']}%" if not turnout_df.empty else "N/A"
-        winner = winner_df.iloc[0]['winner'] if not winner_df.empty else "N/A"
-        
-        detail_children = [
-            html.H5(f"Ward {ward_number}", className="mb-3"),
-            make_metric_card("Population", population),
-            make_metric_card("Turnout Rate", turnout_rate, "Mayoral race"),
-            make_metric_card("Crime Rate", crime_rate, "Per 1,000 residents"),
-            make_metric_card("Disorder Rate", disorder_rate, "Per 1,000 residents"),
-            make_metric_card("Top Mayoral Candidate", winner, "Most votes in ward"),
-        ]
-        
-        return detail_children
-        
-    except Exception as e:
-        print(f"Error in ward details: {e}")
-        return html.P(f"Error loading data for Ward {ward_number}", className="text-danger")
-
-
 
 # ---- Curated Sets ----
 

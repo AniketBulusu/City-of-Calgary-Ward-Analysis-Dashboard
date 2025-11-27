@@ -7,9 +7,6 @@ sqlalchemy
 dash
 dash-bootstrap-components
 pandas
-sqlalchemy
-psycopg2-binary
 plotly
 python-dotenv
-shapely
 statsmodels

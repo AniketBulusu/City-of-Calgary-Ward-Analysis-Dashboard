@@ -203,16 +203,16 @@ def load_ward_recreation(engine):
     facility_cols = [col for col in df.columns if col not in ['ward', 'total']]
     records = []
     for _, row in df.iterrows():
-        for facilitiy_type in facility_cols:
-            if row[facilitiy_type] > 0:
+        for facility_type in facility_cols:
+            if row[facility_type] > 0:
                 records.append({
                     'ward_number' : row['ward'],
-                    'facility_type': facilitiy_type,
-                    'count': row[facilitiy_type]
+                    'facility_type': facility_type,
+                    'count': row[facility_type]
                 })
     rec_df = pd.DataFrame(records)
     rec_df.to_sql('ward_recreation', engine, if_exists='append', index=False)
-    print("Loaded ward recreatio nfacilities.")
+    print("Loaded ward recreation facilities.")
 
 def load_community_services(engine):
     print("Loading community services...")
@@ -239,7 +239,7 @@ def load_ward_boundaries(engine):
 
     csv_path = DATA_DIR / "Ward_Boundaries_20251117.csv"
     if not csv_path.exists():
-        print("⚠️ CSV file not found:", csv_path)
+        print("WARNING: CSV file not found:", csv_path)
         return
 
     # Read CSV instead of GeoJSON
@@ -258,7 +258,7 @@ def load_ward_boundaries(engine):
         "ward_boundaries_20251117", engine, if_exists="replace", index=False
     )
 
-    print("✅ Loaded ward boundaries (CSV).")
+    print("Loaded ward boundaries (CSV).")
 
 
 def load_election_data(engine):
@@ -384,7 +384,7 @@ def load_election_data(engine):
 
     results_df = pd.DataFrame(results)
 
-    # 🔑 Remove duplicate PK combinations before insert
+    # Remove duplicate PK combinations before insert
     results_df = results_df.drop_duplicates(
         subset=['station_code', 'candidate_id', 'race_id'],
         keep='first'
