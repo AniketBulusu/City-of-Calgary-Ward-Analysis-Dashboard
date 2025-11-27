@@ -380,6 +380,34 @@ app.layout = dbc.Container(
                                     ],
                                     width=8,
                                 ),
+
+                                dbc.Col(
+                                    [
+                                        html.H4(
+                                            "Disclaimer on Data",
+                                            className="mt-4 mb-3",
+                                        ),
+                                        dbc.Card(
+                                            dbc.CardBody(
+                                                [
+                                                    html.P(
+                                                        "The original data sources for this project only included "
+                                                        "binary gender categories of male and female. We recognize "
+                                                        "that these statistics contain "
+                                                        "important information regarding political leanings and - more "
+                                                        "generally - social importance. The decision was made to model "
+                                                        "the data that exists for the sake of the project as is. "
+                                                        "This limitation reduces inclusiveness and should "
+                                                        "be considered when interpreting.",
+                                                        className="mb-2",
+                                                    ),
+                                                ]
+                                            ),
+                                            className="shadow-sm",
+                                        ),
+                                    ],
+                                    width=8,
+                                ),
                             ],
                             justify="center",
                         )
