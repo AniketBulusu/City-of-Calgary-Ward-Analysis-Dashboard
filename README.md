@@ -19,7 +19,7 @@ Clone the project, and cd into the cloned folder, then...
 
 2. **Load data** (in new terminal):
 ```bash
-   docker-compose exec app python app/load_data.py
+   docker-compose exec app python app/loader.py
 ```
 
 3. **Open dashboard:**
