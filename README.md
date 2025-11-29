@@ -195,3 +195,9 @@ http://localhost:8050
 
 7. mCoding. (2024, August 2). Docker Tutorial for Beginners. YouTube. https://www.youtube.com/watch?v=b0HMimUb4f0 
 
+8. A practical introduction to databases — a practical introduction to databases. (n.d.). https://runestone.academy/ns/books/published/practical_db/index.html 
+
+9. W3schools.com. W3Schools Online Web Tutorials. (n.d.-a). https://www.w3schools.com/postgresql/index.php 
+
+10. Ark Coding. (n.d.). Streamlit vs Dash - Which one is better? Interactive Dashboard with Python. YouTube. https://www.youtube.com/watch?v=tXHXDRog37A 
+
