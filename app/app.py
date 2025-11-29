@@ -11,7 +11,7 @@ from dash import Dash, dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
-from map_component import ward_map_component  # ← Import your custom map
+from map_component import ward_map_component
 
 # Set base pash for project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -1547,7 +1547,7 @@ def update_custom_visualization(n_clicks, characteristic, politics):
 
     return fig, msg
 
-### DATA VIEW
+# DATA VIEW
 
 @app.callback(
     Output("sql-query-display", "children"),

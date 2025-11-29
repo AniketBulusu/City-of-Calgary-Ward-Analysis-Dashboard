@@ -45,7 +45,7 @@ for file in os.listdir(csv_folder):
             df = pd.read_csv(file_path, encoding=encoding, on_bad_lines="skip")
         except (UnicodeDecodeError, pd.errors.ParserError) as e:
             print(
-                f"[⚠] Failed with {encoding} due to {type(e).__name__}, retrying with latin1 and skipping bad lines...")
+                f"[WARNING] Failed with {encoding} due to {type(e).__name__}, retrying with latin1 and skipping bad lines...")
             df = pd.read_csv(file_path, encoding=encoding, on_bad_lines="skip")
         # Ensure all column names are strings
         df.columns = df.columns.map(str)
@@ -71,7 +71,7 @@ for file in os.listdir(csv_folder):
             cursor.execute(insert_sql, list(row))
         conn.commit()
 
-        print(f"[✔] Imported {file} into table {table_name}")
+        print(f"[SUCCESS] Imported {file} into table {table_name}")
 
 cursor.close()
 conn.close()

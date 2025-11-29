@@ -47,7 +47,7 @@ for file in os.listdir(csv_folder):
             df = pd.read_csv(file_path, encoding=encoding, on_bad_lines="skip")
         except (UnicodeDecodeError, pd.errors.ParserError) as e:
             print(
-                f"[⚠] Failed with {encoding} due to {type(e).__name__}, retrying with latin1 and skipping bad lines...")
+                f"[WARNING] Failed with {encoding} due to {type(e).__name__}, retrying with latin1 and skipping bad lines...")
             df = pd.read_csv(file_path, encoding=encoding, on_bad_lines="skip")
         # Ensure all column names are strings
         df.columns = df.columns.map(str)
@@ -73,7 +73,7 @@ for file in os.listdir(csv_folder):
             cursor.execute(insert_sql, list(row))
         conn.commit()
 
-        print(f"[✔] Imported {file} into table {table_name}")
+        print(f"[SUCCESS] Imported {file} into table {table_name}")
 
 
 
@@ -85,13 +85,13 @@ rows = cursor.fetchall()
 columns = [desc[0] for desc in cursor.description]
 df = pd.DataFrame(rows, columns=columns)
 
-# Clean and convert population to integers as l think Population was stored as a string originally
+# Clean and convert population to integers
 df["Population"] = df["Population"].str.replace(",", "").astype(int)
 
-# Sam and Sultan, so l found that our column name "Ward " has a trailing space which might cause issues later on. So yeah, just keep that in consideration. 
+# Note: column name "Ward " has a trailing space
 df.rename(columns={"Ward ": "Ward"}, inplace=True)
 
-#  Plotting the data. Just used to w3schools as reference. I honestly think that is the way to go for out visualizations. However, l think we can explore more options later on in terms of more eye catching visualizations. 
+# Plotting the data 
 plt.figure(figsize=(10, 6))
 plt.bar(df["Ward"], df["Population"], color="mediumseagreen", edgecolor="black")
 plt.title("Population by Ward")
@@ -104,6 +104,3 @@ plt.show()
             
 cursor.close()
 conn.close()
-
-
-# TO-DO : Create Data Visualizations using Matplotlib,Seaborn, and Plotly to get an insight on how we can visualize the data.

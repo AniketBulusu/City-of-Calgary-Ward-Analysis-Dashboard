@@ -34,6 +34,6 @@ folium.GeoJson(
     }
 ).add_to(m)
 
-# 7️⃣ Save and open
+# Save and open
 m.save("ward_map.html")
-print("✅ Map saved as ward_map.html")
+print("Map saved as ward_map.html")

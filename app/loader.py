@@ -1,4 +1,4 @@
-## Loads data from the csv's into PostgreSQL database using the provided schema
+# Loads data from the csv's into PostgreSQL database using the provided schema
 
 import pandas as pd
 import os
@@ -7,7 +7,7 @@ from pathlib import Path
 import sys
 import time
 
-## FOR DOCKER
+# FOR DOCKER
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
