@@ -80,28 +80,6 @@ docker compose restart app
 **Permission errors on Windows:**
 - You may need to run windows terminal as Administrator
 
-## Project Structure MUST look like this
-```
-|-- docker-compose.yml     # docker compose file 
-|-- Dockerfile             # docker container
-|-- requirements.txt       # dependencies
-|-- entrypoint.sh          # entry script used by docker
-|-- diagrams/              # project diagrams
-|   |-- (all diagrams are here)
-|-- db/                    # data-base relevant items
-|   |-- schema.sql         # Database schema (auto-loaded)
-|-- app/                   # All python apps go here
-|   |-- app.py             # Dash dashboard
-|   |-- loader.py          # Loader script puts data into the database
-|   |-- sanitycheck.py     # debugging tool - not relevant to app
-|   |-- map_component.py   # used for the map window
-|-- datasets/              # CSV files (required!)
-|   |-- (all project datasets)
-|-- python/
-|   |-- csvToPgadmin.py    # used by pgAdmin as a GUI approach to databases
-|   |-- MapDisplay.py      # used by the map system on the front page   
-```
-
 # Tech Stack
 
 ### **Infrastructure**
