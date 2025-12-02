@@ -181,3 +181,7 @@ http://localhost:8050
 
 10. Ark Coding. (n.d.). Streamlit vs Dash - Which one is better? Interactive Dashboard with Python. YouTube. https://www.youtube.com/watch?v=tXHXDRog37A 
 
+11. W3Schools. (n.d.). Matplotlib Pyplot. Www.w3schools.com. https://www.w3schools.com/python/matplotlib_pyplot.asp
+
+12. NumPy Tutorial. (n.d.). Www.w3schools.com. https://www.w3schools.com/python/numpy/default.asp
+
