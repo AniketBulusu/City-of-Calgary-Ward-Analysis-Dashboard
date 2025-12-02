@@ -408,6 +408,38 @@ app.layout = dbc.Container(
                                     ],
                                     width=8,
                                 ),
+
+                                dbc.Col(
+                                    [
+                                        html.H4(
+                                            "References",
+                                            className="mt-4 mb-3",
+                                        ),
+                                        dbc.Card(
+                                            dbc.CardBody(
+                                                [
+                                                    html.Ol(
+                                                        [
+                                                            html.Li("NeuralNine. (2024, September 13). Build Data Apps in Python with Plotly Dash. YouTube. https://www.youtube.com/watch?v=pLU7ZLPhyX8"),
+                                                            html.Li("Colgan, M. (2020, July 7). Developing and Deploying Data-Driven Apps. YouTube. https://www.youtube.com/watch?v=KreNYemH198"),
+                                                            html.Li("Hello dash. Plotly. (n.d.). https://dash.plotly.com/layout"),
+                                                            html.Li("Guides. Docker Documentation. (2024, December 20). https://docs.docker.com/guides/"),
+                                                            html.Li("PostgreSQL 18.1 documentation. PostgreSQL Documentation. (2025, November 13). https://www.postgresql.org/docs/current/index.html"),
+                                                            html.Li("SQLALCHEMY 2.0 documentation. SQLAlchemy Unified Tutorial - SQLAlchemy 2.0 Documentation. (n.d.). https://docs.sqlalchemy.org/en/20/tutorial/index.html"),
+                                                            html.Li("mCoding. (2024, August 2). Docker Tutorial for Beginners. YouTube. https://www.youtube.com/watch?v=b0HMimUb4f0"),
+                                                            html.Li("A practical introduction to databases — a practical introduction to databases. (n.d.). https://runestone.academy/ns/books/published/practical_db/index.html"),
+                                                            html.Li("W3schools.com. W3Schools Online Web Tutorials. (n.d.-a). https://www.w3schools.com/postgresql/index.php"),
+                                                            html.Li("Ark Coding. (n.d.). Streamlit vs Dash - Which one is better? Interactive Dashboard with Python. YouTube. https://www.youtube.com/watch?v=tXHXDRog37A"),
+                                                        ],
+                                                        className="mb-2",
+                                                    ),
+                                                ]
+                                            ),
+                                            className="shadow-sm",
+                                        ),
+                                    ],
+                                    width=8,
+                                ),
                             ],
                             justify="center",
                         )
