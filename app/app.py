@@ -1123,20 +1123,20 @@ def update_custom_visualization(n_clicks, characteristic, politics):
         elif characteristic == "income" and politics == "turnout":
             query = '''
                 WITH income_summary AS (
-                    SELECT 
+                    SELECT
                         ward_number,
                         SUM(household_count) as total_households,
                         -- Calculate weighted average income
                         ROUND(
-                            (SUM(CASE WHEN income_group = 'under_$20000' THEN household_count * 10000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$20000_to_$39999' THEN household_count * 30000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$40000_to_$59999' THEN household_count * 50000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$60000_to_$79999' THEN household_count * 70000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$80000_to_$99999' THEN household_count * 90000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$100000_to_$124999' THEN household_count * 112500 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$125000_to_$149999' THEN household_count * 137500 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$150000_to_$199999' THEN household_count * 175000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$200000_and_over' THEN household_count * 250000 ELSE 0 END))
+                            (SUM(CASE WHEN income_group = 'under_$20000' THEN household_count::numeric * 10000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$20000_to_$39999' THEN household_count::numeric * 30000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$40000_to_$59999' THEN household_count::numeric * 50000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$60000_to_$79999' THEN household_count::numeric * 70000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$80000_to_$99999' THEN household_count::numeric * 90000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$100000_to_$124999' THEN household_count::numeric * 112500 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$125000_to_$149999' THEN household_count::numeric * 137500 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$150000_to_$199999' THEN household_count::numeric * 175000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$200000_and_over' THEN household_count::numeric * 250000 ELSE 0 END))
                             / NULLIF(SUM(household_count), 0)
                         ) as avg_income
                     FROM ward_income
@@ -1170,18 +1170,18 @@ def update_custom_visualization(n_clicks, characteristic, politics):
         elif characteristic == "income" and politics == "winner":
             query = '''
                 WITH income_summary AS (
-                    SELECT 
+                    SELECT
                         ward_number,
                         ROUND(
-                            (SUM(CASE WHEN income_group = 'under_$20000' THEN household_count * 10000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$20000_to_$39999' THEN household_count * 30000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$40000_to_$59999' THEN household_count * 50000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$60000_to_$79999' THEN household_count * 70000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$80000_to_$99999' THEN household_count * 90000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$100000_to_$124999' THEN household_count * 112500 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$125000_to_$149999' THEN household_count * 137500 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$150000_to_$199999' THEN household_count * 175000 ELSE 0 END) +
-                             SUM(CASE WHEN income_group = '$200000_and_over' THEN household_count * 250000 ELSE 0 END))
+                            (SUM(CASE WHEN income_group = 'under_$20000' THEN household_count::numeric * 10000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$20000_to_$39999' THEN household_count::numeric * 30000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$40000_to_$59999' THEN household_count::numeric * 50000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$60000_to_$79999' THEN household_count::numeric * 70000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$80000_to_$99999' THEN household_count::numeric * 90000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$100000_to_$124999' THEN household_count::numeric * 112500 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$125000_to_$149999' THEN household_count::numeric * 137500 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$150000_to_$199999' THEN household_count::numeric * 175000 ELSE 0 END) +
+                             SUM(CASE WHEN income_group = '$200000_and_over' THEN household_count::numeric * 250000 ELSE 0 END))
                             / NULLIF(SUM(household_count), 0)
                         ) as avg_income
                     FROM ward_income
@@ -1199,7 +1199,7 @@ def update_custom_visualization(n_clicks, characteristic, politics):
                     WHERE r.type = 'MAYOR'
                     GROUP BY vs.ward_number, c.name
                 )
-                SELECT 
+                SELECT
                     ww.ward_number,
                     ww.candidate_name,
                     ims.avg_income,
