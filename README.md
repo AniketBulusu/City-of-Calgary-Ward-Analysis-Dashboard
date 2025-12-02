@@ -3,6 +3,8 @@
 
 # Calgary Ward Dashboard
 
+Refer to documents and diagrams sub-folders for other submission-relevant data. You will find our document on normalization under /documents. 
+
 ### Requirements:
 
 - Docker Desktop (includes Docker Compose)
