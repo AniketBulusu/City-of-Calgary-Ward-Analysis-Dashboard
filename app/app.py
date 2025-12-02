@@ -1445,33 +1445,32 @@ def update_custom_visualization(n_clicks, characteristic, politics):
 
         elif characteristic == "transit" and politics == "winner":
             query = '''
-                WITH ward_winners AS (
+                WITH candidate_transit_votes AS (
                     SELECT
-                        vs.ward_number,
                         c.name as candidate_name,
+                        wts.active as active_stops,
                         SUM(er.votes) as total_votes
                     FROM election_result er
                     JOIN candidate c ON er.candidate_id = c.candidate_id
                     JOIN race r ON er.race_id = r.race_id
                     JOIN voting_station vs ON er.station_code = vs.station_code
+                    JOIN ward_transit_stops wts ON vs.ward_number = wts.ward_number
                     WHERE r.type = 'MAYOR'
-                    GROUP BY vs.ward_number, c.name
+                    GROUP BY c.name, wts.active
                 )
-                SELECT 
-                    ww.ward_number,
-                    ww.candidate_name,
-                    wts.active as active_stops,
-                    ww.total_votes
-                FROM ward_winners ww
-                JOIN ward_transit_stops wts ON ww.ward_number = wts.ward_number
-                ORDER BY ww.ward_number, ww.total_votes DESC
+                SELECT
+                    candidate_name,
+                    active_stops,
+                    total_votes
+                FROM candidate_transit_votes
+                ORDER BY active_stops, total_votes DESC
             '''
             df = query_db(query)
-            
+
             # Get top 5 candidates
             top_candidates = df.groupby('candidate_name')['total_votes'].sum().nlargest(5).index
             df_filtered = df[df['candidate_name'].isin(top_candidates)]
-            
+
             fig = px.line(
                 df_filtered,
                 x='active_stops',
@@ -1482,7 +1481,7 @@ def update_custom_visualization(n_clicks, characteristic, politics):
                 labels={'active_stops': 'Active Transit Stops', 'total_votes': 'Votes', 'candidate_name': 'Candidate'},
                 height=600
             )
-            msg = "Shows how top 5 candidates performed in wards with different transit access levels."
+            msg = "Shows how top 5 candidates performed across different transit accessibility levels (aggregated by stop count)."
 
         # PUBLIC TRANSIT USERS
         elif characteristic == "work_transit" and politics == "turnout":
