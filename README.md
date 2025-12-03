@@ -22,7 +22,7 @@ Ensure Docker Desktop is installed and **running**
 
 Clone the project and navigate into the folder:
 ```bash
-git clone 
+git clone git@csgit.ucalgary.ca:ssafe/cpsc471p.git
 cd cpsc471p
 ```
 
@@ -39,6 +39,8 @@ Then follow these steps:
    ```
    http://localhost:8050
    ```
+
+The project is now ready to be used. The steps below are for troubleshooting only.
 
 **Manual data reload (only if needed):**
 
