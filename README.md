@@ -185,3 +185,32 @@ http://localhost:8050
 
 12. NumPy Tutorial. (n.d.). Www.w3schools.com. https://www.w3schools.com/python/numpy/default.asp
 
+DATASET REFERENCES:
+
+WARD_HOUSEHOLD_INCOME
+Canada, S. (2020) 2016 Census of Canada - Household Income, Calgary.ca. Available at: https://data.calgary.ca/Demographics/2016-Census-of-Canada-Household-Income/wj3a-wgmh/data_preview (Accessed: 30 October 2025). 
+
+CALGARY_TRANSIT_STOPS
+Calgary Transit Stops | Open Calgary (no date) data.calgary.ca. Available at: https://data.calgary.ca/Transportation-Transit/Calgary-Transit-Stops/muzh-c9qc/data_preview.
+
+WARD_PROFILES
+Neighbourhoods, C. (no date) Ward Profiles, https://www.calgary.ca. Available at: https://www.calgary.ca/communities/profiles/wards.html
+
+WARD_BY_AGE_GENDER
+The (2019) Civic Census by Ward, Age and Gender, Calgary.ca. Available at:  (Accessed: 30 October 2025).  
+https://data.calgary.ca/Demographics/Civic-Census-by-Ward-Age-and-Gender/ga6m-7k2i/about_data
+
+WARD_DISORDER & WARD_CRIME
+Data (2024) Calgarypolice.ca(Accessed: 30 October 2025) 
+
+WARD_ELECTION_RESULTS
+General Election 2021 Results by Voting Stations | Open Calgary (2018) Calgary.ca. Available at:https://data.calgary.ca/Government/General-Election-2021-Results-by-Voting-Stations/5ajn-7mmh (Accessed: 30 October 2025).‌ 
+
+WARD_COMMUNITY_SERVICES
+The. (2016, July 6). Community Services. Calgary.ca. https://data.calgary.ca/Services-and-Amenities/Community-Services/x34e-bcjz/about_data
+
+WARD_RECREATIONAL_FACILTIIES
+The. (2016, November 2). Recreation Facilities. Calgary.ca. https://data.calgary.ca/Recreation-and-Culture/Recreation-Facilities/hxfu-6d96/data_preview
+
+WARD_LABOUR_FORCE
+The. (2024, September 5). 2021 Federal Census Employment by Ward. Calgary.ca. https://data.calgary.ca/Demographics/2021-Federal-Census-Employment-by-Ward/b5q8-82zn/data_preview
