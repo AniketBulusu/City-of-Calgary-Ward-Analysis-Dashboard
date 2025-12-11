@@ -22,7 +22,7 @@ Ensure Docker Desktop is installed and **running**
 
 Clone the project and navigate into the folder:
 ```bash
-git clone git@csgit.ucalgary.ca:ssafe/cpsc471p.git
+git clone https://github.com/AniketBulusu/City-of-Calgary-Ward-Analysis-Dashboard.git
 cd cpsc471p
 ```
 
